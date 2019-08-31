@@ -94,6 +94,36 @@ def open_work_selection_window():
     window_start_new_work.title("Type de traveaux")
     window_start_new_work.wm_attributes("-topmost", 1)
 
+def get_list_of_names_from_first_sheet(excel_workbook):
+    list_of_names = []
+    ws = excel_workbook["first"]
+    empty_line_number = find_the_next_empty_row(ws)
+    for index in range(2, empty_line_number):
+        saved_name = str(ws.cell(row=index, column=1).value)
+        list_of_names.append(saved_name)
+    return list_of_names
+
+
+'''
+writing a value to a cell
+ws.cell(row=empty_line_number, column=2, value=last_payment)
+
+getting value from a cell
+saved_name = str(ws.cell(row=index, column=1).value)
+
+'''
+
+def create_excel_file_if_it_was_not_there():
+    if not check_if_excel_file_is_there():
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "first"
+        ws.cell(row=1, column=1, value="name")
+        ws.cell(row=1, column=2, value="last date")
+        ws.cell(row=1, column=3, value="last payment")
+        ws.cell(row=1, column=4, value="total payment")
+        wb.save(generate_the_excel_file_name_with_current_year_in_name())
+
 
 main_window_of_gui = tkinter.Tk()
 main_window_of_gui.title("sandbox")
