@@ -1,5 +1,6 @@
 import tkinter
 from tkinter import Label, Button, Entry, Checkbutton, OptionMenu, Canvas, Frame, Toplevel
+from tkinter.ttk import Combobox
 from tkinter import StringVar, IntVar
 from tkinter.messagebox import showinfo
 import openpyxl
@@ -13,6 +14,8 @@ import os
 abspath = os.path.abspath(__file__)
 current_directory = os.path.dirname(abspath)
 os.chdir(current_directory)
+
+LIST_TYPE_OF_WORK = ["default1", "default2"]
 
 def get_file_names_in_script_directory():
     file_names = []
@@ -93,6 +96,9 @@ def open_work_selection_window():
     window_start_new_work.geometry("%dx%d+%d+%d" % (w, h, x, y))
     window_start_new_work.title("Type de traveaux")
     window_start_new_work.wm_attributes("-topmost", 1)
+    combo_work_selection_window = Combobox(window_start_new_work, values = LIST_TYPE_OF_WORK)
+    combo_work_selection_window.grid(column=0, row=0)
+    combo_work_selection_window.current(0)
 
 def get_list_of_names_from_first_sheet(excel_workbook):
     list_of_names = []
