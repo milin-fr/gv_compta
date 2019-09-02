@@ -93,12 +93,28 @@ def open_work_selection_window():
     y = main_window_of_gui.winfo_y()
     w = main_window_of_gui.winfo_width()
     h = main_window_of_gui.winfo_height()  
+    
     window_start_new_work.geometry("%dx%d+%d+%d" % (w, h, x, y))
     window_start_new_work.title("Type de traveaux")
     window_start_new_work.wm_attributes("-topmost", 1)
+    
     combo_work_selection_window = Combobox(window_start_new_work, values = LIST_TYPE_OF_WORK)
-    combo_work_selection_window.grid(column=0, row=0)
+    combo_work_selection_window.grid(column=0, row=0, columnspan=2)
     combo_work_selection_window.current(0)
+
+    button_confirm_work_selection = Button(window_start_new_work, text="Selectioner", width=20, height=3, command=open_company_selection_window)
+    button_confirm_work_selection.grid(column=0, row=1)
+
+    button_cancel_work_selection = Button(window_start_new_work, text="Annuler", width=20, height=3, command=cancel_work_selection_window)
+    button_cancel_work_selection.grid(column=1, row=1)
+
+def open_company_selection_window():
+    pass
+
+
+def cancel_work_selection_window():
+    pass
+
 
 def get_list_of_names_from_first_sheet(excel_workbook):
     list_of_names = []
