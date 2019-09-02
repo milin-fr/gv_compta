@@ -102,18 +102,18 @@ def open_work_selection_window():
     combo_work_selection_window.grid(column=0, row=0, columnspan=2)
     combo_work_selection_window.current(0)
 
-    button_confirm_work_selection = Button(window_start_new_work, text="Selectioner", width=20, height=3, command=open_company_selection_window)
+    button_confirm_work_selection = Button(window_start_new_work, text="Selectioner", width=20, height=3, command=lambda: open_company_selection_window(window_start_new_work))
     button_confirm_work_selection.grid(column=0, row=1)
 
-    button_cancel_work_selection = Button(window_start_new_work, text="Annuler", width=20, height=3, command=cancel_work_selection_window)
+    button_cancel_work_selection = Button(window_start_new_work, text="Annuler", width=20, height=3, command=lambda: cancel_work_selection_window(window_start_new_work))
     button_cancel_work_selection.grid(column=1, row=1)
 
-def open_company_selection_window():
+def open_company_selection_window(window_start_new_work):
     pass
 
 
-def cancel_work_selection_window():
-    pass
+def cancel_work_selection_window(window_start_new_work):
+    window_start_new_work.destroy()
 
 
 def get_list_of_names_from_first_sheet(excel_workbook):
