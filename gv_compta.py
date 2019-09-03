@@ -15,7 +15,8 @@ abspath = os.path.abspath(__file__)
 current_directory = os.path.dirname(abspath)
 os.chdir(current_directory)
 
-LIST_TYPE_OF_WORK = ["default1", "default2"]
+LIST_TYPE_OF_WORK = ["work1", "work2"]
+LIST_OF_COMPANIES = ["company1", "company2"]
 
 def get_file_names_in_script_directory():
     file_names = []
@@ -105,15 +106,36 @@ def open_work_selection_window():
     button_confirm_work_selection = Button(window_start_new_work, text="Selectioner", width=20, height=3, command=lambda: open_company_selection_window(window_start_new_work))
     button_confirm_work_selection.grid(column=0, row=1)
 
-    button_cancel_work_selection = Button(window_start_new_work, text="Annuler", width=20, height=3, command=lambda: cancel_work_selection_window(window_start_new_work))
+    button_cancel_work_selection = Button(window_start_new_work, text="Annuler", width=20, height=3, command=lambda: cancel_selection_window(window_start_new_work))
     button_cancel_work_selection.grid(column=1, row=1)
 
 def open_company_selection_window(window_start_new_work):
+    window_select_company = Toplevel()
+    x = main_window_of_gui.winfo_x()
+    y = main_window_of_gui.winfo_y()
+    w = main_window_of_gui.winfo_width()
+    h = main_window_of_gui.winfo_height()
+    
+    window_select_company.geometry("%dx%d+%d+%d" % (w, h, x, y))
+    window_select_company.title("Choix de l'entreprise")
+    window_select_company.wm_attributes("-topmost", 1)
+    
+    combo_company_selection_window = Combobox(window_select_company, values = LIST_OF_COMPANIES)
+    combo_company_selection_window.grid(column=0, row=0, columnspan=2)
+    combo_company_selection_window.current(0)
+
+    button_confirm_company_selection = Button(window_select_company, text="Selectioner", width=20, height=3, command=lambda: confirm_company_selection(window_select_company))
+    button_confirm_company_selection.grid(column=0, row=1)
+
+    button_cancel_company_selection = Button(window_select_company, text="Annuler", width=20, height=3, command=lambda: cancel_selection_window(window_select_company))
+    button_cancel_company_selection.grid(column=1, row=1)
+
+
+def confirm_company_selection(window_select_company):
     pass
 
-
-def cancel_work_selection_window(window_start_new_work):
-    window_start_new_work.destroy()
+def cancel_selection_window(window_to_close):
+    window_to_close.destroy()
 
 
 def get_list_of_names_from_first_sheet(excel_workbook):
