@@ -35,8 +35,6 @@ def get_existing_excel_names():
     return existing_excel_names
 
 
-
-
 def get_date_yyyy_mm_dd():
     return str(datetime.date.today())
 
@@ -103,13 +101,13 @@ def open_work_selection_window():
     combo_work_selection_window.grid(column=0, row=0, columnspan=2)
     combo_work_selection_window.current(0)
 
-    button_confirm_work_selection = Button(window_start_new_work, text="Selectioner", width=20, height=3, command=lambda: open_company_selection_window(window_start_new_work))
+    button_confirm_work_selection = Button(window_start_new_work, text="Selectioner", width=20, height=3, command=lambda: open_company_selection_window(combo_work_selection_window))
     button_confirm_work_selection.grid(column=0, row=1)
 
     button_cancel_work_selection = Button(window_start_new_work, text="Annuler", width=20, height=3, command=lambda: cancel_selection_window(window_start_new_work))
     button_cancel_work_selection.grid(column=1, row=1)
 
-def open_company_selection_window(window_start_new_work):
+def open_company_selection_window(combo_work_selection_window):
     window_select_company = Toplevel()
     x = main_window_of_gui.winfo_x()
     y = main_window_of_gui.winfo_y()
@@ -124,15 +122,31 @@ def open_company_selection_window(window_start_new_work):
     combo_company_selection_window.grid(column=0, row=0, columnspan=2)
     combo_company_selection_window.current(0)
 
-    button_confirm_company_selection = Button(window_select_company, text="Selectioner", width=20, height=3, command=lambda: confirm_company_selection(window_select_company))
-    button_confirm_company_selection.grid(column=0, row=1)
+    button_open_details_entry = Button(window_select_company, text="Selectioner", width=20, height=3, command=lambda: open_details_entry(combo_work_selection_window, combo_company_selection_window))
+    button_open_details_entry.grid(column=0, row=1)
 
     button_cancel_company_selection = Button(window_select_company, text="Annuler", width=20, height=3, command=lambda: cancel_selection_window(window_select_company))
     button_cancel_company_selection.grid(column=1, row=1)
 
 
-def confirm_company_selection(window_select_company):
-    pass
+def open_details_entry(combo_work_selection_window, combo_company_selection_window):
+    window_details_entry = Toplevel()
+    x = main_window_of_gui.winfo_x()
+    y = main_window_of_gui.winfo_y()
+    w = main_window_of_gui.winfo_width()
+    h = main_window_of_gui.winfo_height()
+    
+    window_details_entry.geometry("%dx%d+%d+%d" % (w, h, x, y))
+    window_details_entry.title("Informations additionelles")
+    window_details_entry.wm_attributes("-topmost", 1)
+
+    var_work_type = StringVar()
+    var_work_type.set(combo_work_selection_window.get())
+    label_work_type = Label(window_details_entry, textvariable=var_work_type)
+    label_work_type.grid(column=0, row=0)
+    
+
+
 
 def cancel_selection_window(window_to_close):
     window_to_close.destroy()
