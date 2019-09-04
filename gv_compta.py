@@ -86,50 +86,7 @@ def button_pressed():
     pass
 
 
-def open_work_selection_window():
-    window_start_new_work = Toplevel()
-    x = main_window_of_gui.winfo_x()
-    y = main_window_of_gui.winfo_y()
-    w = main_window_of_gui.winfo_width()
-    h = main_window_of_gui.winfo_height()  
-    
-    window_start_new_work.geometry("%dx%d+%d+%d" % (w, h, x, y))
-    window_start_new_work.title("Type de traveaux")
-    window_start_new_work.wm_attributes("-topmost", 1)
-    
-    combo_work_selection_window = Combobox(window_start_new_work, values = LIST_TYPE_OF_WORK)
-    combo_work_selection_window.grid(column=0, row=0, columnspan=2)
-    combo_work_selection_window.current(0)
-
-    button_confirm_work_selection = Button(window_start_new_work, text="Selectioner", width=20, height=3, command=lambda: open_company_selection_window(combo_work_selection_window))
-    button_confirm_work_selection.grid(column=0, row=1)
-
-    button_cancel_work_selection = Button(window_start_new_work, text="Annuler", width=20, height=3, command=lambda: cancel_current_window(window_start_new_work))
-    button_cancel_work_selection.grid(column=1, row=1)
-
-def open_company_selection_window(combo_work_selection_window):
-    window_select_company = Toplevel()
-    x = main_window_of_gui.winfo_x()
-    y = main_window_of_gui.winfo_y()
-    w = main_window_of_gui.winfo_width()
-    h = main_window_of_gui.winfo_height()
-    
-    window_select_company.geometry("%dx%d+%d+%d" % (w, h, x, y))
-    window_select_company.title("Choix de l'entreprise")
-    window_select_company.wm_attributes("-topmost", 1)
-    
-    combo_company_selection_window = Combobox(window_select_company, values = LIST_OF_COMPANIES)
-    combo_company_selection_window.grid(column=0, row=0, columnspan=2)
-    combo_company_selection_window.current(0)
-
-    button_open_details_entry = Button(window_select_company, text="Selectioner", width=20, height=3, command=lambda: open_details_entry(combo_work_selection_window, combo_company_selection_window))
-    button_open_details_entry.grid(column=0, row=1)
-
-    button_cancel_company_selection = Button(window_select_company, text="Annuler", width=20, height=3, command=lambda: cancel_current_window(window_select_company))
-    button_cancel_company_selection.grid(column=1, row=1)
-
-
-def open_details_entry(combo_work_selection_window, combo_company_selection_window):
+def open_details_entry():
     today_date_yyyy_mm_dd = get_date_yyyy_mm_dd()
     window_details_entry = Toplevel()
     x = main_window_of_gui.winfo_x()
@@ -141,42 +98,52 @@ def open_details_entry(combo_work_selection_window, combo_company_selection_wind
     window_details_entry.title("Informations additionelles")
     window_details_entry.wm_attributes("-topmost", 1)
 
-    var_work_type = StringVar()
-    var_work_type.set(combo_work_selection_window.get())
-    label_work_type = Label(window_details_entry, textvariable=var_work_type)
-    label_work_type.grid(column=0, row=0)
+    combo_work_selection_window = Combobox(window_details_entry, values = LIST_TYPE_OF_WORK)
+    combo_work_selection_window.grid(column=0, row=0, columnspan=2)
+    combo_work_selection_window.current(0)
 
-    var_company_name = StringVar()
-    var_company_name.set(combo_company_selection_window.get())
-    label_company_name = Label(window_details_entry, textvariable=var_company_name)
-    label_company_name.grid(column=0, row=1)
+    combo_company_selection_window = Combobox(window_details_entry, values = LIST_OF_COMPANIES)
+    combo_company_selection_window.grid(column=0, row=1, columnspan=2)
+    combo_company_selection_window.current(0)
 
     entry_forecasted_price = Entry(window_details_entry)
-    entry_forecasted_price.grid(column=0, row=2)
+    entry_forecasted_price.grid(column=0, row=3)
 
     entry_forecasted_start_date = Entry(window_details_entry)
     entry_forecasted_start_date.insert(0, today_date_yyyy_mm_dd)
-    entry_forecasted_start_date.grid(column=0, row=2)
+    entry_forecasted_start_date.grid(column=0, row=4)
 
     entry_forecasted_end_date = Entry(window_details_entry)
     entry_forecasted_end_date.insert(0, today_date_yyyy_mm_dd)
-    entry_forecasted_end_date.grid(column=0, row=3)
+    entry_forecasted_end_date.grid(column=0, row=5)
 
     text_first_comment = Text(window_details_entry)
-    text_first_comment.grid(column=0, row=4)
+    text_first_comment.grid(column=0, row=6, columnspan=2)
 
-    button_confirm_details_entry = Button(window_details_entry, text="Selectioner", width=20, height=3, command=lambda: confirm_details_entry())
-    button_confirm_details_entry.grid(column=0, row=5)
+    data_entries = [combo_work_selection_window, combo_company_selection_window, entry_forecasted_price, entry_forecasted_start_date, entry_forecasted_end_date, text_first_comment]
+
+    button_confirm_details_entry = Button(window_details_entry, text="Selectioner", width=20, height=3, command=lambda: confirm_details_entry(data_entries))
+    button_confirm_details_entry.grid(column=0, row=7)
 
     button_cancel_details_entry = Button(window_details_entry, text="Annuler", width=20, height=3, command=lambda: cancel_current_window(window_details_entry))
-    button_cancel_details_entry.grid(column=1, row=5)
+    button_cancel_details_entry.grid(column=1, row=7)
 
 def cancel_current_window(window_to_close):
     window_to_close.destroy()
 
-def confirm_details_entry():
-    pass
-
+def confirm_details_entry(data_entries):
+    type_of_work = data_entries[0].get()
+    company_name = data_entries[1].get()
+    forecasted_price = data_entries[2].get()
+    forecasted_start_date = data_entries[3].get()
+    forecasted_end_date = data_entries[4].get()
+    first_comment = data_entries[5].get('1.0', 'end-1c')
+    print(type_of_work)
+    print(company_name)
+    print(forecasted_price)
+    print(forecasted_start_date)
+    print(forecasted_end_date)
+    print(first_comment)
 
 
 def get_list_of_names_from_first_sheet(excel_workbook):
@@ -214,7 +181,7 @@ main_window_of_gui = tkinter.Tk()
 main_window_of_gui.title("sandbox")
 main_window_of_gui.wm_attributes("-topmost", 1)
 
-button_start_new_work = Button(main_window_of_gui, text="Nouvelle facture", width=20, height=3, command=open_work_selection_window)
+button_start_new_work = Button(main_window_of_gui, text="Nouvelle facture", width=20, height=3, command=open_details_entry)
 button_start_new_work.grid(row=0, column=0)
 
 main_window_of_gui.mainloop()
