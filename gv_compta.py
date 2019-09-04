@@ -153,6 +153,10 @@ def open_details_entry(combo_work_selection_window, combo_company_selection_wind
     entry_forecasted_price = Entry(window_details_entry)
     entry_forecasted_price.grid(column=0, row=2)
 
+    entry_forecasted_start_date = Entry(window_details_entry)
+    entry_forecasted_start_date.insert(0, get_date_yyyy_mm_dd())
+    entry_forecasted_start_date.grid(column=0, row=2)
+
 def cancel_selection_window(window_to_close):
     window_to_close.destroy()
 
