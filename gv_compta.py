@@ -144,9 +144,14 @@ def open_details_entry(combo_work_selection_window, combo_company_selection_wind
     var_work_type.set(combo_work_selection_window.get())
     label_work_type = Label(window_details_entry, textvariable=var_work_type)
     label_work_type.grid(column=0, row=0)
-    
 
+    var_company_name = StringVar()
+    var_company_name.set(combo_company_selection_window.get())
+    label_company_name = Label(window_details_entry, textvariable=var_company_name)
+    label_company_name.grid(column=0, row=1)
 
+    entry_forecasted_price = Entry(window_details_entry)
+    entry_forecasted_price.grid(column=0, row=2)
 
 def cancel_selection_window(window_to_close):
     window_to_close.destroy()
