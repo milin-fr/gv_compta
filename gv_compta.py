@@ -1,5 +1,5 @@
 import tkinter
-from tkinter import Label, Button, Entry, Checkbutton, OptionMenu, Canvas, Frame, Toplevel
+from tkinter import Label, Button, Entry, Text, Checkbutton, OptionMenu, Canvas, Frame, Toplevel
 from tkinter.ttk import Combobox
 from tkinter import StringVar, IntVar
 from tkinter.messagebox import showinfo
@@ -104,7 +104,7 @@ def open_work_selection_window():
     button_confirm_work_selection = Button(window_start_new_work, text="Selectioner", width=20, height=3, command=lambda: open_company_selection_window(combo_work_selection_window))
     button_confirm_work_selection.grid(column=0, row=1)
 
-    button_cancel_work_selection = Button(window_start_new_work, text="Annuler", width=20, height=3, command=lambda: cancel_selection_window(window_start_new_work))
+    button_cancel_work_selection = Button(window_start_new_work, text="Annuler", width=20, height=3, command=lambda: cancel_current_window(window_start_new_work))
     button_cancel_work_selection.grid(column=1, row=1)
 
 def open_company_selection_window(combo_work_selection_window):
@@ -125,11 +125,12 @@ def open_company_selection_window(combo_work_selection_window):
     button_open_details_entry = Button(window_select_company, text="Selectioner", width=20, height=3, command=lambda: open_details_entry(combo_work_selection_window, combo_company_selection_window))
     button_open_details_entry.grid(column=0, row=1)
 
-    button_cancel_company_selection = Button(window_select_company, text="Annuler", width=20, height=3, command=lambda: cancel_selection_window(window_select_company))
+    button_cancel_company_selection = Button(window_select_company, text="Annuler", width=20, height=3, command=lambda: cancel_current_window(window_select_company))
     button_cancel_company_selection.grid(column=1, row=1)
 
 
 def open_details_entry(combo_work_selection_window, combo_company_selection_window):
+    today_date_yyyy_mm_dd = get_date_yyyy_mm_dd()
     window_details_entry = Toplevel()
     x = main_window_of_gui.winfo_x()
     y = main_window_of_gui.winfo_y()
@@ -154,11 +155,28 @@ def open_details_entry(combo_work_selection_window, combo_company_selection_wind
     entry_forecasted_price.grid(column=0, row=2)
 
     entry_forecasted_start_date = Entry(window_details_entry)
-    entry_forecasted_start_date.insert(0, get_date_yyyy_mm_dd())
+    entry_forecasted_start_date.insert(0, today_date_yyyy_mm_dd)
     entry_forecasted_start_date.grid(column=0, row=2)
 
-def cancel_selection_window(window_to_close):
+    entry_forecasted_end_date = Entry(window_details_entry)
+    entry_forecasted_end_date.insert(0, today_date_yyyy_mm_dd)
+    entry_forecasted_end_date.grid(column=0, row=3)
+
+    text_first_comment = Text(window_details_entry)
+    text_first_comment.grid(column=0, row=4)
+
+    button_confirm_details_entry = Button(window_details_entry, text="Selectioner", width=20, height=3, command=lambda: confirm_details_entry())
+    button_confirm_details_entry.grid(column=0, row=5)
+
+    button_cancel_details_entry = Button(window_details_entry, text="Annuler", width=20, height=3, command=lambda: cancel_current_window(window_details_entry))
+    button_cancel_details_entry.grid(column=1, row=5)
+
+def cancel_current_window(window_to_close):
     window_to_close.destroy()
+
+def confirm_details_entry():
+    pass
+
 
 
 def get_list_of_names_from_first_sheet(excel_workbook):
