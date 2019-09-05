@@ -15,7 +15,7 @@ abspath = os.path.abspath(__file__)
 current_directory = os.path.dirname(abspath)
 os.chdir(current_directory)
 
-LIST_TYPE_OF_WORK = ["work1", "work2"]
+LIST_TYPE_OF_WORK = []
 LIST_OF_COMPANIES = ["company1", "company2"]
 
 
@@ -114,6 +114,7 @@ def create_missing_sheet_if_it_was_not_there(bill_object):
 
 def open_details_entry():
     today_date_yyyy_mm_dd = get_date_yyyy_mm_dd()
+    opdate_work_type_list()
     window_details_entry = Toplevel()
     x = main_window_of_gui.winfo_x()
     y = main_window_of_gui.winfo_y()
@@ -160,17 +161,32 @@ def cancel_current_window(window_to_close):
 
 
 def confirm_details_entry(data_entries):
-    type_of_work = data_entries[0].get()
+    work_type = data_entries[0].get()
     company_name = data_entries[1].get()
     forecasted_price = data_entries[2].get()
     forecasted_start_date = data_entries[3].get()
     forecasted_end_date = data_entries[4].get()
     first_comment = data_entries[5].get('1.0', 'end-1c')
     
-    bill_object = Bill("Not started", type_of_work, company_name, forecasted_price, forecasted_start_date, forecasted_end_date, first_comment)
+    bill_object = Bill("Not started", work_type, company_name, forecasted_price, forecasted_start_date, forecasted_end_date, first_comment)
     
     create_excel_file_if_it_was_not_there(bill_object)
     create_missing_sheet_if_it_was_not_there(bill_object)
+    save_first_entry(bill_object)
+
+
+def save_first_entry(bill_object):
+    wb = load_workbook(bill_object.excel_file_name)
+    ws = wb[bill_object.company_name]
+    new_row = find_the_next_empty_row(ws)
+    ws.cell(row=new_row, column=1, value=bill_object.work_type)
+    ws.cell(row=new_row, column=2, value=bill_object.company_name)
+    ws.cell(row=new_row, column=3, value=bill_object.forecasted_price)
+    ws.cell(row=new_row, column=4, value=bill_object.forecasted_start_date)
+    ws.cell(row=new_row, column=5, value=bill_object.forecasted_end_date)
+    ws.cell(row=new_row, column=6, value=bill_object.initial_comment)
+    ws.cell(row=new_row, column=7, value=bill_object.current_state)
+    wb.save(bill_object.excel_file_name)
 
 
 
@@ -182,6 +198,16 @@ def get_list_of_names_from_first_sheet(excel_workbook):
         saved_name = str(ws.cell(row=index, column=1).value)
         list_of_names.append(saved_name)
     return list_of_names
+
+
+def opdate_work_type_list():
+    global LIST_TYPE_OF_WORK
+    LIST_TYPE_OF_WORK = []
+    existing_excel_names = get_existing_excel_names()
+    for file_name in existing_excel_names:
+        work_type = file_name[10:-5]
+        LIST_TYPE_OF_WORK.append(work_type)
+
 
 
 '''
