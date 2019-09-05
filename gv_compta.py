@@ -59,37 +59,25 @@ def get_date_yyyy_mm_dd():
     return str(datetime.date.today())
 
 
-def get_current_year():
-    #current_month = datetime.datetime.now().strftime('%B') #extracts the name of the current month
-    current_year = datetime.datetime.now().strftime('%Y') #extracts the current year
-    return str(current_year)
-
-
-def create_excel_file(bill_object):
-    wb = Workbook()
-    ws = wb.active
-    ws.title = bill_object.company_name
-    ws.cell(row=1, column=1, value="name")
-    ws.cell(row=1, column=2, value="last date")
-    ws.cell(row=1, column=3, value="last payment")
-    ws.cell(row=1, column=4, value="total payment")
-    wb.save(bill_object.excel_file_name)
-
-
-def check_if_excel_file_is_there():
-    return generate_the_excel_file_name_with_current_year_in_name() in get_existing_excel_names()
-
-
-def create_excel_file_if_it_was_not_there():
-    if not check_if_excel_file_is_there():
+def create_excel_file_if_it_was_not_there(bill_object):
+    if bill_object.excel_file_name not in get_existing_excel_names():
         wb = Workbook()
         ws = wb.active
-        ws.title = "first"
-        ws.cell(row=1, column=1, value="name")
-        ws.cell(row=1, column=2, value="last date")
-        ws.cell(row=1, column=3, value="last payment")
-        ws.cell(row=1, column=4, value="total payment")
-        wb.save(generate_the_excel_file_name_with_current_year_in_name())
+        ws.title = bill_object.company_name
+        ws.cell(row=1, column=1, value="work_type")
+        ws.cell(row=1, column=2, value="company_name")
+        ws.cell(row=1, column=3, value="forecasted_price")
+        ws.cell(row=1, column=4, value="forecasted_start_date")
+        ws.cell(row=1, column=5, value="forecasted_end_date")
+        ws.cell(row=1, column=6, value="initial_comment")
+        ws.cell(row=1, column=7, value="current_state")
+        ws.cell(row=1, column=8, value="work_started_comment")
+        ws.cell(row=1, column=9, value="work_ongoing_comment")
+        ws.cell(row=1, column=10, value="work_finished_comment")
+        ws.cell(row=1, column=11, value="real_start_date")
+        ws.cell(row=1, column=12, value="real_price")
+        ws.cell(row=1, column=13, value="real_end_date")
+        wb.save(bill_object.excel_file_name)
 
 
 def find_the_next_empty_row(ws):
@@ -101,16 +89,27 @@ def find_the_next_empty_row(ws):
     return row_index
 
 
-def create_missing_sheet(name, excel_workbook):
-    print("creating missing sheet " + name)
-    if name not in excel_workbook.sheetnames:
-        excel_workbook.create_sheet(name)
-        ws = excel_workbook[name]
-        ws.cell(row=1, column=1, value="last date")
-        ws.cell(row=1, column=2, value="last payment")
-
-def button_pressed():
-    pass
+def create_missing_sheet_if_it_was_not_there(bill_object):
+    wb = load_workbook(bill_object.excel_file_name)
+    if bill_object.company_name not in wb.sheetnames:
+        wb.create_sheet(bill_object.company_name)
+        ws = wb[bill_object.company_name]
+        ws.cell(row=1, column=1, value="work_type")
+        ws.cell(row=1, column=2, value="company_name")
+        ws.cell(row=1, column=3, value="forecasted_price")
+        ws.cell(row=1, column=4, value="forecasted_start_date")
+        ws.cell(row=1, column=5, value="forecasted_end_date")
+        ws.cell(row=1, column=6, value="initial_comment")
+        ws.cell(row=1, column=7, value="current_state")
+        ws.cell(row=1, column=8, value="work_started_comment")
+        ws.cell(row=1, column=9, value="work_ongoing_comment")
+        ws.cell(row=1, column=10, value="work_finished_comment")
+        ws.cell(row=1, column=11, value="real_start_date")
+        ws.cell(row=1, column=12, value="real_price")
+        ws.cell(row=1, column=13, value="real_end_date")
+        wb.save(bill_object.excel_file_name)
+    else:
+        wb.close()
 
 
 def open_details_entry():
@@ -155,8 +154,10 @@ def open_details_entry():
     button_cancel_details_entry = Button(window_details_entry, text="Annuler", width=20, height=3, command=lambda: cancel_current_window(window_details_entry))
     button_cancel_details_entry.grid(column=1, row=7)
 
+
 def cancel_current_window(window_to_close):
     window_to_close.destroy()
+
 
 def confirm_details_entry(data_entries):
     type_of_work = data_entries[0].get()
@@ -165,16 +166,12 @@ def confirm_details_entry(data_entries):
     forecasted_start_date = data_entries[3].get()
     forecasted_end_date = data_entries[4].get()
     first_comment = data_entries[5].get('1.0', 'end-1c')
+    
     bill_object = Bill("Not started", type_of_work, company_name, forecasted_price, forecasted_start_date, forecasted_end_date, first_comment)
+    
+    create_excel_file_if_it_was_not_there(bill_object)
+    create_missing_sheet_if_it_was_not_there(bill_object)
 
-    create_excel_file(bill_object)
-
-
-def check_if_this_type_of_work_already_saved(type_of_work):
-    existing_excel_names = get_existing_excel_names()
-    for name in existing_excel_names:
-        print(name)
-    return "GV compta " + type_of_work + ".xlsx" in existing_excel_names
 
 
 def get_list_of_names_from_first_sheet(excel_workbook):
@@ -195,18 +192,6 @@ getting value from a cell
 saved_name = str(ws.cell(row=index, column=1).value)
 
 '''
-
-def create_excel_file_if_it_was_not_there():
-    if not check_if_excel_file_is_there():
-        wb = Workbook()
-        ws = wb.active
-        ws.title = "first"
-        ws.cell(row=1, column=1, value="name")
-        ws.cell(row=1, column=2, value="last date")
-        ws.cell(row=1, column=3, value="last payment")
-        ws.cell(row=1, column=4, value="total payment")
-        wb.save(generate_the_excel_file_name_with_current_year_in_name())
-
 
 main_window_of_gui = tkinter.Tk()
 main_window_of_gui.title("sandbox")
