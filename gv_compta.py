@@ -16,7 +16,7 @@ current_directory = os.path.dirname(abspath)
 os.chdir(current_directory)
 
 LIST_TYPE_OF_WORK = []
-LIST_OF_COMPANIES = ["company1", "company2"]
+LIST_OF_COMPANIES = []
 
 
 class Bill:
@@ -129,9 +129,13 @@ def open_details_entry():
     combo_work_selection_window.grid(column=0, row=0, columnspan=2)
     combo_work_selection_window.current(0)
 
+
+
     combo_company_selection_window = Combobox(window_details_entry, values = LIST_OF_COMPANIES)
     combo_company_selection_window.grid(column=0, row=1, columnspan=2)
-    combo_company_selection_window.current(0)
+    
+    button_confirm_work_type = Button(window_details_entry, text="Ok", command=lambda: update_company_name_list(combo_work_selection_window, combo_company_selection_window))
+    button_confirm_work_type.grid(column=2, row=0)
 
     entry_forecasted_price = Entry(window_details_entry)
     entry_forecasted_price.grid(column=0, row=3)
@@ -207,6 +211,16 @@ def opdate_work_type_list():
     for file_name in existing_excel_names:
         work_type = file_name[10:-5]
         LIST_TYPE_OF_WORK.append(work_type)
+
+def update_company_name_list(combo_work_selection_window, combo_company_selection_window):
+    global LIST_OF_COMPANIES
+    LIST_OF_COMPANIES = []
+    excel_file_name = "GV compta " + combo_work_selection_window.get() + ".xlsx"
+    wb = load_workbook(excel_file_name)
+    LIST_OF_COMPANIES = wb.sheetnames
+    wb.close()
+    combo_company_selection_window['values'] = LIST_OF_COMPANIES
+    combo_company_selection_window.current(0)
 
 
 
