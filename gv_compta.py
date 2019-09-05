@@ -17,25 +17,28 @@ os.chdir(current_directory)
 
 LIST_TYPE_OF_WORK = []
 LIST_OF_COMPANIES = []
+LIST_OF_BILLS = []
 
 
 class Bill:
-    def __init__(self, current_state, work_type, company_name, forecasted_price, forecasted_start_date, forecasted_end_date, initial_comment):
-        self.current_state = current_state
-        self.work_type = work_type
-        self.company_name = company_name
-        self.forecasted_price = forecasted_price
-        self.forecasted_start_date = forecasted_start_date
-        self.forecasted_end_date = forecasted_end_date
-        self.initial_comment = initial_comment
-        self.work_started_comment = ""
-        self.work_ongoing_comment = ""
-        self.work_finished_comment = ""
-        self.real_start_date = ""
-        self.real_price = ""
-        self.real_end_date = ""
-        self.state_list = ["Not started", "Started", "Ongoing", "Finished", "Canceled"]
-        self.excel_file_name = "GV compta " + work_type + ".xlsx"
+    row_placement = ""
+    current_state = ""
+    work_type = ""
+    company_name = ""
+    forecasted_price = ""
+    forecasted_start_date = ""
+    forecasted_end_date = ""
+    initial_comment = ""
+    work_started_comment = ""
+    work_ongoing_comment = ""
+    work_finished_comment = ""
+    real_start_date = ""
+    real_price = ""
+    real_end_date = ""
+    state_list = ["Not started", "Started", "Ongoing", "Finished", "Canceled"]
+    excel_file_name = ""
+    def set_excel_name(self):
+        self.excel_file_name = "GV compta " + self.work_type + ".xlsx"
 
 
 def get_file_names_in_script_directory():
@@ -64,13 +67,13 @@ def create_excel_file_if_it_was_not_there(bill_object):
         wb = Workbook()
         ws = wb.active
         ws.title = bill_object.company_name
-        ws.cell(row=1, column=1, value="work_type")
-        ws.cell(row=1, column=2, value="company_name")
-        ws.cell(row=1, column=3, value="forecasted_price")
-        ws.cell(row=1, column=4, value="forecasted_start_date")
-        ws.cell(row=1, column=5, value="forecasted_end_date")
-        ws.cell(row=1, column=6, value="initial_comment")
-        ws.cell(row=1, column=7, value="current_state")
+        ws.cell(row=1, column=1, value="current_state")
+        ws.cell(row=1, column=2, value="work_type")
+        ws.cell(row=1, column=3, value="company_name")
+        ws.cell(row=1, column=4, value="forecasted_price")
+        ws.cell(row=1, column=5, value="forecasted_start_date")
+        ws.cell(row=1, column=6, value="forecasted_end_date")
+        ws.cell(row=1, column=7, value="initial_comment")
         ws.cell(row=1, column=8, value="work_started_comment")
         ws.cell(row=1, column=9, value="work_ongoing_comment")
         ws.cell(row=1, column=10, value="work_finished_comment")
@@ -127,9 +130,6 @@ def open_details_entry():
 
     combo_work_selection_window = Combobox(window_details_entry, values = LIST_TYPE_OF_WORK)
     combo_work_selection_window.grid(column=0, row=0, columnspan=2)
-    combo_work_selection_window.current(0)
-
-
 
     combo_company_selection_window = Combobox(window_details_entry, values = LIST_OF_COMPANIES)
     combo_company_selection_window.grid(column=0, row=1, columnspan=2)
@@ -148,12 +148,12 @@ def open_details_entry():
     entry_forecasted_end_date.insert(0, today_date_yyyy_mm_dd)
     entry_forecasted_end_date.grid(column=0, row=5)
 
-    text_first_comment = Text(window_details_entry)
+    text_first_comment = Text(window_details_entry, width=40, height=20)
     text_first_comment.grid(column=0, row=6, columnspan=2)
 
     data_entries = [combo_work_selection_window, combo_company_selection_window, entry_forecasted_price, entry_forecasted_start_date, entry_forecasted_end_date, text_first_comment]
 
-    button_confirm_details_entry = Button(window_details_entry, text="Selectioner", width=20, height=3, command=lambda: confirm_details_entry(data_entries))
+    button_confirm_details_entry = Button(window_details_entry, text="Selectioner", width=20, height=3, command=lambda: confirm_details_entry(data_entries, window_details_entry))
     button_confirm_details_entry.grid(column=0, row=7)
 
     button_cancel_details_entry = Button(window_details_entry, text="Annuler", width=20, height=3, command=lambda: cancel_current_window(window_details_entry))
@@ -164,7 +164,7 @@ def cancel_current_window(window_to_close):
     window_to_close.destroy()
 
 
-def confirm_details_entry(data_entries):
+def confirm_details_entry(data_entries, window_to_close):
     work_type = data_entries[0].get()
     company_name = data_entries[1].get()
     forecasted_price = data_entries[2].get()
@@ -172,24 +172,35 @@ def confirm_details_entry(data_entries):
     forecasted_end_date = data_entries[4].get()
     first_comment = data_entries[5].get('1.0', 'end-1c')
     
-    bill_object = Bill("Not started", work_type, company_name, forecasted_price, forecasted_start_date, forecasted_end_date, first_comment)
+    bill_object = Bill()
+    bill_object.current_state = "Not started"
+    bill_object.work_type = work_type
+    bill_object.company_name = company_name
+    bill_object.forecasted_price = forecasted_price
+    bill_object.forecasted_start_date = forecasted_start_date
+    bill_object.forecasted_end_date = forecasted_end_date
+    bill_object.initial_comment = first_comment
+    bill_object.set_excel_name()
+    
     
     create_excel_file_if_it_was_not_there(bill_object)
     create_missing_sheet_if_it_was_not_there(bill_object)
     save_first_entry(bill_object)
+    cancel_current_window(window_to_close)
 
 
 def save_first_entry(bill_object):
     wb = load_workbook(bill_object.excel_file_name)
     ws = wb[bill_object.company_name]
     new_row = find_the_next_empty_row(ws)
-    ws.cell(row=new_row, column=1, value=bill_object.work_type)
-    ws.cell(row=new_row, column=2, value=bill_object.company_name)
-    ws.cell(row=new_row, column=3, value=bill_object.forecasted_price)
-    ws.cell(row=new_row, column=4, value=bill_object.forecasted_start_date)
-    ws.cell(row=new_row, column=5, value=bill_object.forecasted_end_date)
-    ws.cell(row=new_row, column=6, value=bill_object.initial_comment)
-    ws.cell(row=new_row, column=7, value=bill_object.current_state)
+    ws.cell(row=new_row, column=1, value=bill_object.current_state)
+    ws.cell(row=new_row, column=2, value=bill_object.work_type)
+    ws.cell(row=new_row, column=3, value=bill_object.company_name)
+    ws.cell(row=new_row, column=4, value=bill_object.forecasted_price)
+    ws.cell(row=new_row, column=5, value=bill_object.forecasted_start_date)
+    ws.cell(row=new_row, column=6, value=bill_object.forecasted_end_date)
+    ws.cell(row=new_row, column=7, value=bill_object.initial_comment)
+    
     wb.save(bill_object.excel_file_name)
 
 
@@ -216,11 +227,53 @@ def update_company_name_list(combo_work_selection_window, combo_company_selectio
     global LIST_OF_COMPANIES
     LIST_OF_COMPANIES = []
     excel_file_name = "GV compta " + combo_work_selection_window.get() + ".xlsx"
-    wb = load_workbook(excel_file_name)
-    LIST_OF_COMPANIES = wb.sheetnames
+    if excel_file_name in get_existing_excel_names():
+        wb = load_workbook(excel_file_name)
+        LIST_OF_COMPANIES = wb.sheetnames
+        wb.close()
+        combo_company_selection_window['values'] = LIST_OF_COMPANIES
+        combo_company_selection_window.current(0)
+
+def open_ongoing_view():
+    global LIST_OF_BILLS
+    get_list_of_bills()
+    for bill in LIST_OF_BILLS:
+        print(bill.initial_comment)
+
+
+def get_details_out_of_excel(excel_file):
+    global LIST_OF_BILLS
+    wb = load_workbook(excel_file)
+    for company_sheet in wb.sheetnames:
+        ws = wb[company_sheet]
+        maximum_number_of_rows = find_the_next_empty_row(ws)
+        for current_row in range(2, maximum_number_of_rows):
+            bill = Bill()
+            bill.row_placement = current_row
+            bill.current_state = ws.cell(row=current_row, column=1).value
+            bill.work_type = ws.cell(row=current_row, column=2).value
+            bill.company_name = ws.cell(row=current_row, column=3).value
+            bill.forecasted_price = ws.cell(row=current_row, column=4).value
+            bill.forecasted_start_date = ws.cell(row=current_row, column=5).value
+            bill.forecasted_end_date = ws.cell(row=current_row, column=6).value
+            bill.initial_comment = ws.cell(row=current_row, column=7).value
+            bill.work_started_comment = ws.cell(row=current_row, column=8).value
+            bill.work_ongoing_comment = ws.cell(row=current_row, column=9).value
+            bill.work_finished_comment = ws.cell(row=current_row, column=10).value
+            bill.real_start_date = ws.cell(row=current_row, column=11).value
+            bill.real_price = ws.cell(row=current_row, column=12).value
+            bill.real_end_date = ws.cell(row=current_row, column=13).value
+            LIST_OF_BILLS.append(bill)
     wb.close()
-    combo_company_selection_window['values'] = LIST_OF_COMPANIES
-    combo_company_selection_window.current(0)
+
+
+
+def get_list_of_bills():
+    global LIST_OF_BILLS
+    LIST_OF_BILLS = []
+    existing_excel_names = get_existing_excel_names()
+    for excel_file in existing_excel_names:
+        get_details_out_of_excel(excel_file)
 
 
 
@@ -236,8 +289,14 @@ saved_name = str(ws.cell(row=index, column=1).value)
 main_window_of_gui = tkinter.Tk()
 main_window_of_gui.title("sandbox")
 main_window_of_gui.wm_attributes("-topmost", 1)
+main_window_of_gui.geometry("500x500") #You want the size of the app to be 500x500
+main_window_of_gui.resizable(0, 0)
 
 button_start_new_work = Button(main_window_of_gui, text="Nouvelle facture", width=20, height=3, command=open_details_entry)
 button_start_new_work.grid(row=0, column=0)
+
+button_view_ongoing_work = Button(main_window_of_gui, text="Facture en cours", width=20, height=3, command=open_ongoing_view)
+button_view_ongoing_work.grid(row=0, column=1)
+
 
 main_window_of_gui.mainloop()
