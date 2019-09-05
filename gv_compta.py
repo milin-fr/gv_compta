@@ -18,6 +18,26 @@ os.chdir(current_directory)
 LIST_TYPE_OF_WORK = ["work1", "work2"]
 LIST_OF_COMPANIES = ["company1", "company2"]
 
+
+class Bill:
+    def __init__(self, current_state, work_type, company_name, forecasted_price, forecasted_start_date, forecasted_end_date, initial_comment):
+        self.current_state = current_state
+        self.work_type = work_type
+        self.company_name = company_name
+        self.forecasted_price = forecasted_price
+        self.forecasted_start_date = forecasted_start_date
+        self.forecasted_end_date = forecasted_end_date
+        self.initial_comment = initial_comment
+        self.work_started_comment = ""
+        self.work_ongoing_comment = ""
+        self.work_finished_comment = ""
+        self.real_start_date = ""
+        self.real_price = ""
+        self.real_end_date = ""
+        self.state_list = ["Not started", "Started", "Ongoing", "Finished", "Canceled"]
+        self.excel_file_name = "GV compta " + work_type + ".xlsx"
+
+
 def get_file_names_in_script_directory():
     file_names = []
     for root, dirs, files in os.walk(current_directory):
@@ -45,8 +65,15 @@ def get_current_year():
     return str(current_year)
 
 
-def generate_the_excel_file_name_with_current_year_in_name():
-    return (get_current_year() + " sandbox.xlsx")
+def create_excel_file(bill_object):
+    wb = Workbook()
+    ws = wb.active
+    ws.title = bill_object.company_name
+    ws.cell(row=1, column=1, value="name")
+    ws.cell(row=1, column=2, value="last date")
+    ws.cell(row=1, column=3, value="last payment")
+    ws.cell(row=1, column=4, value="total payment")
+    wb.save(bill_object.excel_file_name)
 
 
 def check_if_excel_file_is_there():
@@ -138,12 +165,16 @@ def confirm_details_entry(data_entries):
     forecasted_start_date = data_entries[3].get()
     forecasted_end_date = data_entries[4].get()
     first_comment = data_entries[5].get('1.0', 'end-1c')
-    print(type_of_work)
-    print(company_name)
-    print(forecasted_price)
-    print(forecasted_start_date)
-    print(forecasted_end_date)
-    print(first_comment)
+    bill_object = Bill("Not started", type_of_work, company_name, forecasted_price, forecasted_start_date, forecasted_end_date, first_comment)
+
+    create_excel_file(bill_object)
+
+
+def check_if_this_type_of_work_already_saved(type_of_work):
+    existing_excel_names = get_existing_excel_names()
+    for name in existing_excel_names:
+        print(name)
+    return "GV compta " + type_of_work + ".xlsx" in existing_excel_names
 
 
 def get_list_of_names_from_first_sheet(excel_workbook):
