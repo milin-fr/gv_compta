@@ -1,5 +1,5 @@
 import tkinter
-from tkinter import Label, Button, Entry, Text, Checkbutton, OptionMenu, Canvas, Frame, Toplevel, Scrollbar, Listbox
+from tkinter import Label, Button, Entry, Text, Checkbutton, OptionMenu, Canvas, Frame, Toplevel, Scrollbar, Listbox, Frame
 from tkinter.ttk import Combobox
 from tkinter import StringVar, IntVar, RIGHT, LEFT, BOTH, Y, END
 from tkinter.messagebox import showinfo
@@ -256,19 +256,23 @@ def open_ongoing_view():
     window_details_entry.title("Factures en cours")
     window_details_entry.wm_attributes("-topmost", 1)
 
-    scrollbar = Scrollbar(window_details_entry)
+    frame_for_the_list = Frame(window_details_entry)
+    frame_for_the_list.grid(column=0, row=0, columnspan=5)
+    frame_for_the_list.config(width=700, height=700, padx=50, pady=50)
+    scrollbar = Scrollbar(frame_for_the_list)
     scrollbar.pack(side=RIGHT, fill=Y)
 
-    listbox = Listbox(window_details_entry, yscrollcommand=scrollbar.set)
+    listbox = Listbox(frame_for_the_list, yscrollcommand=scrollbar.set, width=60)
     for i in range(1000):
         for bill in LIST_OF_BILLS:
-            listbox.insert(END, bill.initial_comment[:20])
+            listbox.insert(END, bill.initial_comment[:50])
     listbox.pack(side=LEFT, fill=BOTH)
     listbox.bind('<<ListboxSelect>>', onselect)
-
     scrollbar.config(command=listbox.yview)
 
-    
+    button = Button(window_details_entry, text="OK")
+    button.grid(column=0, row=1)
+
 
 
 def get_details_out_of_excel(excel_file):
