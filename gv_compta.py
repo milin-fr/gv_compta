@@ -1,7 +1,7 @@
 import tkinter
-from tkinter import Label, Button, Entry, Text, Checkbutton, OptionMenu, Canvas, Frame, Toplevel
+from tkinter import Label, Button, Entry, Text, Checkbutton, OptionMenu, Canvas, Frame, Toplevel, Scrollbar, Listbox
 from tkinter.ttk import Combobox
-from tkinter import StringVar, IntVar
+from tkinter import StringVar, IntVar, RIGHT, LEFT, BOTH, Y, END
 from tkinter.messagebox import showinfo
 import openpyxl
 from openpyxl import Workbook, load_workbook
@@ -117,7 +117,7 @@ def create_missing_sheet_if_it_was_not_there(bill_object):
 
 def open_details_entry():
     today_date_yyyy_mm_dd = get_date_yyyy_mm_dd()
-    opdate_work_type_list()
+    update_work_type_list()
     window_details_entry = Toplevel()
     x = main_window_of_gui.winfo_x()
     y = main_window_of_gui.winfo_y()
@@ -181,8 +181,7 @@ def confirm_details_entry(data_entries, window_to_close):
     bill_object.forecasted_end_date = forecasted_end_date
     bill_object.initial_comment = first_comment
     bill_object.set_excel_name()
-    
-    
+
     create_excel_file_if_it_was_not_there(bill_object)
     create_missing_sheet_if_it_was_not_there(bill_object)
     save_first_entry(bill_object)
@@ -200,9 +199,8 @@ def save_first_entry(bill_object):
     ws.cell(row=new_row, column=5, value=bill_object.forecasted_start_date)
     ws.cell(row=new_row, column=6, value=bill_object.forecasted_end_date)
     ws.cell(row=new_row, column=7, value=bill_object.initial_comment)
-    
-    wb.save(bill_object.excel_file_name)
 
+    wb.save(bill_object.excel_file_name)
 
 
 def get_list_of_names_from_first_sheet(excel_workbook):
@@ -215,13 +213,14 @@ def get_list_of_names_from_first_sheet(excel_workbook):
     return list_of_names
 
 
-def opdate_work_type_list():
+def update_work_type_list():
     global LIST_TYPE_OF_WORK
     LIST_TYPE_OF_WORK = []
     existing_excel_names = get_existing_excel_names()
     for file_name in existing_excel_names:
         work_type = file_name[10:-5]
         LIST_TYPE_OF_WORK.append(work_type)
+
 
 def update_company_name_list(combo_work_selection_window, combo_company_selection_window):
     global LIST_OF_COMPANIES
@@ -234,11 +233,42 @@ def update_company_name_list(combo_work_selection_window, combo_company_selectio
         combo_company_selection_window['values'] = LIST_OF_COMPANIES
         combo_company_selection_window.current(0)
 
-def open_ongoing_view():
+def onselect(evt):
     global LIST_OF_BILLS
+    # Note here that Tkinter passes an event object to onselect()
+    w = evt.widget
+    index = int(w.curselection()[0])
+    value = w.get(index)
+    print('You selected item %d: "%s"' % (index, value))
+
+
+
+def open_ongoing_view():
+    
     get_list_of_bills()
-    for bill in LIST_OF_BILLS:
-        print(bill.initial_comment)
+    window_details_entry = Toplevel()
+    x = main_window_of_gui.winfo_x()
+    y = main_window_of_gui.winfo_y()
+    w = main_window_of_gui.winfo_width()
+    h = main_window_of_gui.winfo_height()
+    
+    window_details_entry.geometry("%dx%d+%d+%d" % (w, h, x, y))
+    window_details_entry.title("Factures en cours")
+    window_details_entry.wm_attributes("-topmost", 1)
+
+    scrollbar = Scrollbar(window_details_entry)
+    scrollbar.pack(side=RIGHT, fill=Y)
+
+    listbox = Listbox(window_details_entry, yscrollcommand=scrollbar.set)
+    for i in range(1000):
+        for bill in LIST_OF_BILLS:
+            listbox.insert(END, bill.initial_comment[:20])
+    listbox.pack(side=LEFT, fill=BOTH)
+    listbox.bind('<<ListboxSelect>>', onselect)
+
+    scrollbar.config(command=listbox.yview)
+
+    
 
 
 def get_details_out_of_excel(excel_file):
