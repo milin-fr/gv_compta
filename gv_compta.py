@@ -242,6 +242,18 @@ def onselect(evt):
     print('You selected item ', row_object,text)
 
 
+def treeview_sort_column(tv, col, reverse):
+    list_of_lines = tv.get_children('')
+    list_of_something = []
+    for single_line in list_of_lines:
+        list_of_something.append((tv.set(single_line, col), single_line))
+    list_of_something.sort(reverse=reverse)
+
+    for index, (val, single_line) in enumerate(list_of_something):
+        tv.move(single_line, '', index)
+
+    tv.heading(col, command=lambda: treeview_sort_column(tv, col, not reverse))
+
 
 def open_ongoing_view():
     
@@ -259,24 +271,24 @@ def open_ongoing_view():
     frame_for_the_list = Frame(window_details_entry)
     frame_for_the_list.grid(column=0, row=0)
     
-    treeview_details_of_ongoing_bills = Treeview(frame_for_the_list)
+    tv_columns = ('1', '2', '3')
+    treeview_details_of_ongoing_bills = Treeview(frame_for_the_list, columns=tv_columns, show='headings')
+    
+    for column in tv_columns:
+        treeview_details_of_ongoing_bills.heading(column, text="my " + column, command=lambda col=column: treeview_sort_column(treeview_details_of_ongoing_bills, col, False))
+    
 
     scrollbar = Scrollbar(frame_for_the_list, command=treeview_details_of_ongoing_bills.yview)
     scrollbar.pack(side=RIGHT, fill=Y)
 
-    treeview_details_of_ongoing_bills['columns'] = ('1', '2', '3')
-    treeview_details_of_ongoing_bills['show'] = 'headings'
-    treeview_details_of_ongoing_bills.heading('1', text='my 1')
-    treeview_details_of_ongoing_bills.heading('2', text='my 2')
-    treeview_details_of_ongoing_bills.heading('3', text='my 3')
     treeview_details_of_ongoing_bills.column('1', anchor='center', width=100)
     treeview_details_of_ongoing_bills.column('2', anchor='center', width=100)
     treeview_details_of_ongoing_bills.column('3', anchor='center', width=100)
     treeview_details_of_ongoing_bills.pack()
     for bill in LIST_OF_BILLS:
-        for i in range(100):
-            treeview_details_of_ongoing_bills.insert('', 'end', text=str(bill.row_placement), values=('10:00 ' + str(i),
-                                 '10:10 ' + str(i), 'Ok ' + str(i)))
+        for i in range(10):
+            treeview_details_of_ongoing_bills.insert('', 'end', text=str(bill.row_placement), values=(bill.company_name + str(i),
+                                 bill.initial_comment + str(i), 'Ok ' + str(i)))
     treeview_details_of_ongoing_bills.bind('<Double-1>', onselect)
     treeview_details_of_ongoing_bills.configure(yscrollcommand=scrollbar.set)
 
