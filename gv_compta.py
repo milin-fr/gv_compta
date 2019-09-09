@@ -1,6 +1,6 @@
 import tkinter
 from tkinter import Label, Button, Entry, Text, Checkbutton, OptionMenu, Canvas, Frame, Toplevel, Scrollbar, Listbox, Frame
-from tkinter.ttk import Combobox
+from tkinter.ttk import Combobox, Treeview
 from tkinter import StringVar, IntVar, RIGHT, LEFT, BOTH, Y, END
 from tkinter.messagebox import showinfo
 import openpyxl
@@ -237,9 +237,9 @@ def onselect(evt):
     global LIST_OF_BILLS
     # Note here that Tkinter passes an event object to onselect()
     w = evt.widget
-    index = int(w.curselection()[0])
-    value = w.get(index)
-    print('You selected item %d: "%s"' % (index, value))
+    row_object = w.selection()[0]
+    text = w.item(row_object, 'text')
+    print('You selected item ', row_object,text)
 
 
 
@@ -257,18 +257,28 @@ def open_ongoing_view():
     window_details_entry.wm_attributes("-topmost", 1)
 
     frame_for_the_list = Frame(window_details_entry)
-    frame_for_the_list.grid(column=0, row=0, columnspan=5)
-    frame_for_the_list.config(width=700, height=700, padx=50, pady=50)
-    scrollbar = Scrollbar(frame_for_the_list)
+    frame_for_the_list.grid(column=0, row=0)
+    
+    tv = Treeview(frame_for_the_list)
+
+    scrollbar = Scrollbar(frame_for_the_list, command=tv.yview)
     scrollbar.pack(side=RIGHT, fill=Y)
 
-    listbox = Listbox(frame_for_the_list, yscrollcommand=scrollbar.set, width=60)
-    for i in range(1000):
-        for bill in LIST_OF_BILLS:
-            listbox.insert(END, bill.initial_comment[:50])
-    listbox.pack(side=LEFT, fill=BOTH)
-    listbox.bind('<<ListboxSelect>>', onselect)
-    scrollbar.config(command=listbox.yview)
+    tv['columns'] = ('1', '2', '3')
+    tv['show'] = 'headings'
+    tv.heading('1', text='my 1')
+    tv.heading('2', text='my 2')
+    tv.heading('3', text='my 3')
+    tv.column('1', anchor='center', width=100)
+    tv.column('2', anchor='center', width=100)
+    tv.column('3', anchor='center', width=100)
+    tv.pack()
+    for bill in LIST_OF_BILLS:
+        for i in range(100):
+            tv.insert('', 'end', text=bill.initial_comment[:50], values=('10:00 ' + str(i),
+                                 '10:10 ' + str(i), 'Ok ' + str(i)))
+    tv.bind('<Double-1>', onselect)
+    tv.configure(yscrollcommand=scrollbar.set)
 
     button = Button(window_details_entry, text="OK")
     button.grid(column=0, row=1)
