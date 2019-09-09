@@ -259,26 +259,26 @@ def open_ongoing_view():
     frame_for_the_list = Frame(window_details_entry)
     frame_for_the_list.grid(column=0, row=0)
     
-    tv = Treeview(frame_for_the_list)
+    treeview_details_of_ongoing_bills = Treeview(frame_for_the_list)
 
-    scrollbar = Scrollbar(frame_for_the_list, command=tv.yview)
+    scrollbar = Scrollbar(frame_for_the_list, command=treeview_details_of_ongoing_bills.yview)
     scrollbar.pack(side=RIGHT, fill=Y)
 
-    tv['columns'] = ('1', '2', '3')
-    tv['show'] = 'headings'
-    tv.heading('1', text='my 1')
-    tv.heading('2', text='my 2')
-    tv.heading('3', text='my 3')
-    tv.column('1', anchor='center', width=100)
-    tv.column('2', anchor='center', width=100)
-    tv.column('3', anchor='center', width=100)
-    tv.pack()
+    treeview_details_of_ongoing_bills['columns'] = ('1', '2', '3')
+    treeview_details_of_ongoing_bills['show'] = 'headings'
+    treeview_details_of_ongoing_bills.heading('1', text='my 1')
+    treeview_details_of_ongoing_bills.heading('2', text='my 2')
+    treeview_details_of_ongoing_bills.heading('3', text='my 3')
+    treeview_details_of_ongoing_bills.column('1', anchor='center', width=100)
+    treeview_details_of_ongoing_bills.column('2', anchor='center', width=100)
+    treeview_details_of_ongoing_bills.column('3', anchor='center', width=100)
+    treeview_details_of_ongoing_bills.pack()
     for bill in LIST_OF_BILLS:
         for i in range(100):
-            tv.insert('', 'end', text=bill.initial_comment[:50], values=('10:00 ' + str(i),
+            treeview_details_of_ongoing_bills.insert('', 'end', text=str(bill.row_placement), values=('10:00 ' + str(i),
                                  '10:10 ' + str(i), 'Ok ' + str(i)))
-    tv.bind('<Double-1>', onselect)
-    tv.configure(yscrollcommand=scrollbar.set)
+    treeview_details_of_ongoing_bills.bind('<Double-1>', onselect)
+    treeview_details_of_ongoing_bills.configure(yscrollcommand=scrollbar.set)
 
     button = Button(window_details_entry, text="OK")
     button.grid(column=0, row=1)
