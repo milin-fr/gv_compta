@@ -81,6 +81,7 @@ def create_summary_excel_file_if_it_was_not_there():
         wb.save("GV compta synthese.xlsx")
 
 def update_summary_excel_file():
+    get_list_of_bills()
     already_spent = 0
     going_to_spend = 0
     for bill in LIST_OF_BILLS:
@@ -334,6 +335,7 @@ def save_bill_in_excel(bill_object):
     ws.cell(row=row_of_this_bill, column=7, value=bill_object.work_status)
 
     wb.save(bill_object.excel_file_name)
+    update_summary_excel_file()
 
 
 def get_list_of_names_from_first_sheet(excel_workbook):
@@ -501,7 +503,6 @@ saved_name = str(ws.cell(row=index, column=1).value)
 '''
 
 create_summary_excel_file_if_it_was_not_there()
-get_list_of_bills()
 update_summary_excel_file()
 
 main_window_of_gui = tkinter.Tk()
