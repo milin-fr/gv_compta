@@ -97,9 +97,10 @@ def create_missing_sheet_if_it_was_not_there(bill_object):
         wb.close()
 
 def toplevel_was_closed(evt):
-    print(evt.widget)
+    unblock_root_buttons()
 
 def open_details_entry():
+    bloc_root_buttons()
     today_date_yyyy_mm_dd = get_date_dd_mm_yyyy()
     update_work_type_list()
     window_details_entry = Toplevel()
@@ -261,7 +262,7 @@ def treeview_sort_column(tv, col, reverse):
 
 
 def open_ongoing_view():
-    
+    bloc_root_buttons()
     get_list_of_bills()
     window_details_entry = Toplevel()
     x = main_window_of_gui.winfo_x()
@@ -287,7 +288,7 @@ def open_ongoing_view():
 
     scrollbar = Scrollbar(frame_for_the_list, command=treeview_details_of_ongoing_bills.yview)
     scrollbar.pack(side=RIGHT, fill=Y)
-   
+      
 
     treeview_details_of_ongoing_bills.pack()
     for bill in LIST_OF_BILLS:
@@ -307,6 +308,8 @@ def open_ongoing_view():
 
     button = Button(window_details_entry, text="OK")
     button.grid(column=0, row=1)
+
+    treeview_details_of_ongoing_bills.bind("<Destroy>", toplevel_was_closed)  # if bind on toplevel, the destruction of all widgets in toplevel trigers the function
 
 
 
@@ -338,6 +341,16 @@ def get_list_of_bills():
     existing_excel_names = get_existing_excel_names()
     for excel_file in existing_excel_names:
         get_details_out_of_excel(excel_file)
+
+
+def bloc_root_buttons():
+    button_start_new_work.config(state="disabled")
+    button_view_ongoing_work.config(state="disabled")
+
+
+def unblock_root_buttons():
+    button_start_new_work.config(state="normal")
+    button_view_ongoing_work.config(state="normal")
 
 
 '''
