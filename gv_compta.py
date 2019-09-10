@@ -47,7 +47,7 @@ def get_existing_excel_names():
     '''Each excel file stands for type of work'''
     existing_excel_names = []
     for file_name in get_file_names_in_script_directory():
-        if "GV compta" in file_name:
+        if file_name != "GV compta synthese.xlsx" and "GV compta" in file_name:
             existing_excel_names.append(file_name)
     return existing_excel_names
 
@@ -80,6 +80,21 @@ def create_summary_excel_file_if_it_was_not_there():
         ws.cell(row=3, column=1, value="Depenses effectives")
         wb.save("GV compta synthese.xlsx")
 
+def update_summary_excel_file():
+    already_spent = 0
+    going_to_spend = 0
+    for bill in LIST_OF_BILLS:
+        if bill.work_status == "Canceled":
+            pass
+        if bill.work_status == "Finished":
+            already_spent += int(bill.price)
+        else:
+            going_to_spend += int(bill.price)
+    wb = load_workbook("GV compta synthese.xlsx")
+    ws = wb.worksheets[0]
+    ws.cell(row=2, column=2, value=going_to_spend)
+    ws.cell(row=3, column=2, value=already_spent)
+    wb.save("GV compta synthese.xlsx")
 
 def find_the_next_empty_row(ws):
     row_index = 1
@@ -486,6 +501,8 @@ saved_name = str(ws.cell(row=index, column=1).value)
 '''
 
 create_summary_excel_file_if_it_was_not_there()
+get_list_of_bills()
+update_summary_excel_file()
 
 main_window_of_gui = tkinter.Tk()
 main_window_of_gui.title("sandbox")
