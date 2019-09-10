@@ -18,24 +18,18 @@ os.chdir(current_directory)
 LIST_TYPE_OF_WORK = []
 LIST_OF_COMPANIES = []
 LIST_OF_BILLS = []
-
+LIST_WORK_STATUS = ["Not started", "Started", "Finished", "Canceled"]
 
 class Bill:
     row_placement = ""
-    current_state = ""
-    work_type = ""
-    company_name = ""
-    forecasted_price = ""
-    forecasted_start_date = ""
-    forecasted_end_date = ""
-    initial_comment = ""
-    work_started_comment = ""
-    work_ongoing_comment = ""
-    work_finished_comment = ""
-    real_start_date = ""
-    real_price = ""
-    real_end_date = ""
-    state_list = ["Not started", "Started", "Ongoing", "Finished", "Canceled"]
+    work_type = ""  #1
+    company_name = ""  #2
+    comment = ""  #3
+    start_date = ""  #4
+    end_date = ""  #5
+    price = ""  #6
+    work_status = ""  #7
+
     excel_file_name = ""
     def set_excel_name(self):
         self.excel_file_name = "GV compta " + self.work_type + ".xlsx"
@@ -58,28 +52,22 @@ def get_existing_excel_names():
     return existing_excel_names
 
 
-def get_date_yyyy_mm_dd():
-    return str(datetime.date.today())
+def get_date_dd_mm_yyyy():
+    return str(datetime.date.today().strftime("%d.%m.%Y"))
 
 
-def create_excel_file_if_it_was_not_there(bill_object):
+def create_bill_excel_file_if_it_was_not_there(bill_object):
     if bill_object.excel_file_name not in get_existing_excel_names():
         wb = Workbook()
         ws = wb.active
         ws.title = bill_object.company_name
-        ws.cell(row=1, column=1, value="current_state")
-        ws.cell(row=1, column=2, value="work_type")
-        ws.cell(row=1, column=3, value="company_name")
-        ws.cell(row=1, column=4, value="forecasted_price")
-        ws.cell(row=1, column=5, value="forecasted_start_date")
-        ws.cell(row=1, column=6, value="forecasted_end_date")
-        ws.cell(row=1, column=7, value="initial_comment")
-        ws.cell(row=1, column=8, value="work_started_comment")
-        ws.cell(row=1, column=9, value="work_ongoing_comment")
-        ws.cell(row=1, column=10, value="work_finished_comment")
-        ws.cell(row=1, column=11, value="real_start_date")
-        ws.cell(row=1, column=12, value="real_price")
-        ws.cell(row=1, column=13, value="real_end_date")
+        ws.cell(row=1, column=1, value="work_type")
+        ws.cell(row=1, column=2, value="company_name")
+        ws.cell(row=1, column=3, value="comment")
+        ws.cell(row=1, column=4, value="start_date")
+        ws.cell(row=1, column=5, value="end_date")
+        ws.cell(row=1, column=6, value="price")
+        ws.cell(row=1, column=7, value="work_status")
         wb.save(bill_object.excel_file_name)
 
 
@@ -99,24 +87,20 @@ def create_missing_sheet_if_it_was_not_there(bill_object):
         ws = wb[bill_object.company_name]
         ws.cell(row=1, column=1, value="work_type")
         ws.cell(row=1, column=2, value="company_name")
-        ws.cell(row=1, column=3, value="forecasted_price")
-        ws.cell(row=1, column=4, value="forecasted_start_date")
-        ws.cell(row=1, column=5, value="forecasted_end_date")
-        ws.cell(row=1, column=6, value="initial_comment")
-        ws.cell(row=1, column=7, value="current_state")
-        ws.cell(row=1, column=8, value="work_started_comment")
-        ws.cell(row=1, column=9, value="work_ongoing_comment")
-        ws.cell(row=1, column=10, value="work_finished_comment")
-        ws.cell(row=1, column=11, value="real_start_date")
-        ws.cell(row=1, column=12, value="real_price")
-        ws.cell(row=1, column=13, value="real_end_date")
+        ws.cell(row=1, column=3, value="comment")
+        ws.cell(row=1, column=4, value="start_date")
+        ws.cell(row=1, column=5, value="end_date")
+        ws.cell(row=1, column=6, value="price")
+        ws.cell(row=1, column=7, value="work_status")
         wb.save(bill_object.excel_file_name)
     else:
         wb.close()
 
+def toplevel_was_closed(evt):
+    print(evt.widget)
 
 def open_details_entry():
-    today_date_yyyy_mm_dd = get_date_yyyy_mm_dd()
+    today_date_yyyy_mm_dd = get_date_dd_mm_yyyy()
     update_work_type_list()
     window_details_entry = Toplevel()
     x = main_window_of_gui.winfo_x()
@@ -127,37 +111,64 @@ def open_details_entry():
     window_details_entry.geometry("%dx%d+%d+%d" % (w, h, x, y))
     window_details_entry.title("Informations additionelles")
     window_details_entry.wm_attributes("-topmost", 1)
-
-    combo_work_selection_window = Combobox(window_details_entry, values = LIST_TYPE_OF_WORK)
-    combo_work_selection_window.grid(column=0, row=0, columnspan=2)
-
-    combo_company_selection_window = Combobox(window_details_entry, values = LIST_OF_COMPANIES)
-    combo_company_selection_window.grid(column=0, row=1, columnspan=2)
     
-    button_confirm_work_type = Button(window_details_entry, text="Ok", command=lambda: update_company_name_list(combo_work_selection_window, combo_company_selection_window))
-    button_confirm_work_type.grid(column=2, row=0)
+    label_work_selection = Label(window_details_entry, text = "Type de traveaux :", width=15)
+    label_work_selection.grid(column=0, row=0, pady=5)
 
-    entry_forecasted_price = Entry(window_details_entry)
-    entry_forecasted_price.grid(column=0, row=3)
+    combo_work_selection = Combobox(window_details_entry, values = LIST_TYPE_OF_WORK)
+    combo_work_selection.grid(column=1, row=0, columnspan=2, pady=5)
 
-    entry_forecasted_start_date = Entry(window_details_entry)
-    entry_forecasted_start_date.insert(0, today_date_yyyy_mm_dd)
-    entry_forecasted_start_date.grid(column=0, row=4)
+    label_company_selection = Label(window_details_entry, text = "Nom de l'entreprise :", width=15)
+    label_company_selection.grid(column=0, row=1, pady=5)
 
-    entry_forecasted_end_date = Entry(window_details_entry)
-    entry_forecasted_end_date.insert(0, today_date_yyyy_mm_dd)
-    entry_forecasted_end_date.grid(column=0, row=5)
+    combo_company_selection = Combobox(window_details_entry, values = LIST_OF_COMPANIES)
+    combo_company_selection.grid(column=1, row=1, columnspan=2, pady=5)
+    
 
-    text_first_comment = Text(window_details_entry, width=40, height=20)
-    text_first_comment.grid(column=0, row=6, columnspan=2)
+    label_price = Label(window_details_entry, text = "Prix :", width=15)
+    label_price.grid(column=0, row=2, pady=5)
 
-    data_entries = [combo_work_selection_window, combo_company_selection_window, entry_forecasted_price, entry_forecasted_start_date, entry_forecasted_end_date, text_first_comment]
+    entry_price = Entry(window_details_entry, width=23)
+    entry_price.grid(column=1, row=2, columnspan=2, pady=5)
 
-    button_confirm_details_entry = Button(window_details_entry, text="Selectioner", width=20, height=3, command=lambda: confirm_details_entry(data_entries, window_details_entry))
-    button_confirm_details_entry.grid(column=0, row=7)
+    label_start_date = Label(window_details_entry, text = "Date de debut :", width=15)
+    label_start_date.grid(column=0, row=3, pady=5)
 
-    button_cancel_details_entry = Button(window_details_entry, text="Annuler", width=20, height=3, command=lambda: cancel_current_window(window_details_entry))
-    button_cancel_details_entry.grid(column=1, row=7)
+    entry_start_date = Entry(window_details_entry, width=23)
+    entry_start_date.insert(0, today_date_yyyy_mm_dd)
+    entry_start_date.grid(column=1, row=3, columnspan=2, pady=5)
+
+    label_end_date = Label(window_details_entry, text = "Date de fin :", width=15)
+    label_end_date.grid(column=0, row=4, pady=5)
+
+    entry_end_date = Entry(window_details_entry, width=23)
+    entry_end_date.insert(0, today_date_yyyy_mm_dd)
+    entry_end_date.grid(column=1, row=4, columnspan=2, pady=5)
+
+    label_status = Label(window_details_entry, text = "Etat de traveaux :", width=15)
+    label_status.grid(column=0, row=5, pady=5)
+
+    var_work_status = StringVar()
+    var_work_status.set(LIST_WORK_STATUS[0])
+    dropdown_work_status = OptionMenu(window_details_entry, var_work_status, *LIST_WORK_STATUS)
+    dropdown_work_status.grid(column=1, row=5, columnspan=2, pady=5)
+    dropdown_work_status.config(width=18)
+
+    label_comment = Label(window_details_entry, text = "Commentaires :", width=15)
+    label_comment.grid(column=0, row=6, columnspan=3, pady=5)
+
+    text_comment = Text(window_details_entry, width=60, height=10)
+    text_comment.grid(column=0, row=7, columnspan=3, pady=5)
+
+    data_entries = [combo_work_selection, combo_company_selection, text_comment, entry_start_date, entry_end_date, entry_price, var_work_status]
+
+    button_confirm_details_entry = Button(window_details_entry, text="Selectioner", width=10, height=3, command=lambda: confirm_details_entry(data_entries, window_details_entry))
+    button_confirm_details_entry.grid(column=0, row=8, pady=5)
+
+    button_cancel_details_entry = Button(window_details_entry, text="Annuler", width=10, height=3, command=lambda: cancel_current_window(window_details_entry))
+    button_cancel_details_entry.grid(column=2, row=8, pady=5)
+
+    button_cancel_details_entry.bind("<Destroy>", toplevel_was_closed)  # if bind on toplevel, the destruction of all widgets in toplevel trigers the function
 
 
 def cancel_current_window(window_to_close):
@@ -165,24 +176,17 @@ def cancel_current_window(window_to_close):
 
 
 def confirm_details_entry(data_entries, window_to_close):
-    work_type = data_entries[0].get()
-    company_name = data_entries[1].get()
-    forecasted_price = data_entries[2].get()
-    forecasted_start_date = data_entries[3].get()
-    forecasted_end_date = data_entries[4].get()
-    first_comment = data_entries[5].get('1.0', 'end-1c')
-    
     bill_object = Bill()
-    bill_object.current_state = "Not started"
-    bill_object.work_type = work_type
-    bill_object.company_name = company_name
-    bill_object.forecasted_price = forecasted_price
-    bill_object.forecasted_start_date = forecasted_start_date
-    bill_object.forecasted_end_date = forecasted_end_date
-    bill_object.initial_comment = first_comment
+    bill_object.work_type = data_entries[0].get()
+    bill_object.company_name = data_entries[1].get()
+    bill_object.comment = data_entries[2].get('1.0', 'end-1c')
+    bill_object.start_date = data_entries[3].get()
+    bill_object.end_date = data_entries[4].get()
+    bill_object.price = data_entries[5].get()
+    bill_object.work_status = data_entries[6].get()
     bill_object.set_excel_name()
 
-    create_excel_file_if_it_was_not_there(bill_object)
+    create_bill_excel_file_if_it_was_not_there(bill_object)
     create_missing_sheet_if_it_was_not_there(bill_object)
     save_first_entry(bill_object)
     cancel_current_window(window_to_close)
@@ -192,13 +196,13 @@ def save_first_entry(bill_object):
     wb = load_workbook(bill_object.excel_file_name)
     ws = wb[bill_object.company_name]
     new_row = find_the_next_empty_row(ws)
-    ws.cell(row=new_row, column=1, value=bill_object.current_state)
-    ws.cell(row=new_row, column=2, value=bill_object.work_type)
-    ws.cell(row=new_row, column=3, value=bill_object.company_name)
-    ws.cell(row=new_row, column=4, value=bill_object.forecasted_price)
-    ws.cell(row=new_row, column=5, value=bill_object.forecasted_start_date)
-    ws.cell(row=new_row, column=6, value=bill_object.forecasted_end_date)
-    ws.cell(row=new_row, column=7, value=bill_object.initial_comment)
+    ws.cell(row=new_row, column=1, value=bill_object.work_type)
+    ws.cell(row=new_row, column=2, value=bill_object.company_name)
+    ws.cell(row=new_row, column=3, value=bill_object.comment)
+    ws.cell(row=new_row, column=4, value=bill_object.start_date)
+    ws.cell(row=new_row, column=5, value=bill_object.end_date)
+    ws.cell(row=new_row, column=6, value=bill_object.price)
+    ws.cell(row=new_row, column=7, value=bill_object.work_status)
 
     wb.save(bill_object.excel_file_name)
 
@@ -222,24 +226,25 @@ def update_work_type_list():
         LIST_TYPE_OF_WORK.append(work_type)
 
 
-def update_company_name_list(combo_work_selection_window, combo_company_selection_window):
+def update_company_name_list(combo_work_selection, combo_company_selection):
     global LIST_OF_COMPANIES
     LIST_OF_COMPANIES = []
-    excel_file_name = "GV compta " + combo_work_selection_window.get() + ".xlsx"
+    excel_file_name = "GV compta " + combo_work_selection.get() + ".xlsx"
     if excel_file_name in get_existing_excel_names():
         wb = load_workbook(excel_file_name)
         LIST_OF_COMPANIES = wb.sheetnames
         wb.close()
-        combo_company_selection_window['values'] = LIST_OF_COMPANIES
-        combo_company_selection_window.current(0)
+        combo_company_selection['values'] = LIST_OF_COMPANIES
+        combo_company_selection.current(0)
 
 def onselect(evt):
     global LIST_OF_BILLS
     # Note here that Tkinter passes an event object to onselect()
-    w = evt.widget
-    row_object = w.selection()[0]
-    text = w.item(row_object, 'text')
-    print('You selected item ', row_object,text)
+    clicked_widger = evt.widget
+    row_id = clicked_widger.selection()[0] #particular line that is selected
+    print(clicked_widger.item(row_id))
+    text = clicked_widger.item(row_id, 'text')
+    print('You selected item ', row_id, text)
 
 
 def treeview_sort_column(tv, col, reverse):
@@ -267,28 +272,36 @@ def open_ongoing_view():
     window_details_entry.geometry("%dx%d+%d+%d" % (w, h, x, y))
     window_details_entry.title("Factures en cours")
     window_details_entry.wm_attributes("-topmost", 1)
-
+        
     frame_for_the_list = Frame(window_details_entry)
     frame_for_the_list.grid(column=0, row=0)
     
-    tv_columns = ('1', '2', '3')
+    tv_columns = ('work_type', 'company_name', 'comment', "start_date", "end_date", "price", "work_status")
     treeview_details_of_ongoing_bills = Treeview(frame_for_the_list, columns=tv_columns, show='headings')
     
     for column in tv_columns:
-        treeview_details_of_ongoing_bills.heading(column, text="my " + column, command=lambda col=column: treeview_sort_column(treeview_details_of_ongoing_bills, col, False))
-    
+        treeview_details_of_ongoing_bills.heading(column, text=column, command=lambda col=column: treeview_sort_column(treeview_details_of_ongoing_bills, col, False))
+        treeview_details_of_ongoing_bills.column(column, anchor='center', width=100)
+    treeview_details_of_ongoing_bills.column('comment', anchor='center', width=300)
+
 
     scrollbar = Scrollbar(frame_for_the_list, command=treeview_details_of_ongoing_bills.yview)
     scrollbar.pack(side=RIGHT, fill=Y)
+   
 
-    treeview_details_of_ongoing_bills.column('1', anchor='center', width=100)
-    treeview_details_of_ongoing_bills.column('2', anchor='center', width=100)
-    treeview_details_of_ongoing_bills.column('3', anchor='center', width=100)
     treeview_details_of_ongoing_bills.pack()
     for bill in LIST_OF_BILLS:
         for i in range(10):
-            treeview_details_of_ongoing_bills.insert('', 'end', text=str(bill.row_placement), values=(bill.company_name + str(i),
-                                 bill.initial_comment + str(i), 'Ok ' + str(i)))
+            treeview_details_of_ongoing_bills.insert('', 'end', text=str(bill.row_placement), 
+                                values=(
+                                    bill.work_type + str(i),
+                                    bill.company_name + str(i),
+                                    bill.comment + str(i),
+                                    bill.start_date + str(i),
+                                    bill.end_date + str(i),
+                                    bill.price + str(i),
+                                    bill.work_status + str(i)
+                                ))
     treeview_details_of_ongoing_bills.bind('<Double-1>', onselect)
     treeview_details_of_ongoing_bills.configure(yscrollcommand=scrollbar.set)
 
@@ -306,19 +319,14 @@ def get_details_out_of_excel(excel_file):
         for current_row in range(2, maximum_number_of_rows):
             bill = Bill()
             bill.row_placement = current_row
-            bill.current_state = ws.cell(row=current_row, column=1).value
-            bill.work_type = ws.cell(row=current_row, column=2).value
-            bill.company_name = ws.cell(row=current_row, column=3).value
-            bill.forecasted_price = ws.cell(row=current_row, column=4).value
-            bill.forecasted_start_date = ws.cell(row=current_row, column=5).value
-            bill.forecasted_end_date = ws.cell(row=current_row, column=6).value
-            bill.initial_comment = ws.cell(row=current_row, column=7).value
-            bill.work_started_comment = ws.cell(row=current_row, column=8).value
-            bill.work_ongoing_comment = ws.cell(row=current_row, column=9).value
-            bill.work_finished_comment = ws.cell(row=current_row, column=10).value
-            bill.real_start_date = ws.cell(row=current_row, column=11).value
-            bill.real_price = ws.cell(row=current_row, column=12).value
-            bill.real_end_date = ws.cell(row=current_row, column=13).value
+            bill.work_type = ws.cell(row=current_row, column=1).value
+            bill.company_name = ws.cell(row=current_row, column=2).value
+            bill.comment = ws.cell(row=current_row, column=3).value
+            bill.start_date = ws.cell(row=current_row, column=4).value
+            bill.end_date = ws.cell(row=current_row, column=5).value
+            bill.price = ws.cell(row=current_row, column=6).value
+            bill.work_status = ws.cell(row=current_row, column=7).value
+            bill.set_excel_name()
             LIST_OF_BILLS.append(bill)
     wb.close()
 
@@ -332,7 +340,6 @@ def get_list_of_bills():
         get_details_out_of_excel(excel_file)
 
 
-
 '''
 writing a value to a cell
 ws.cell(row=empty_line_number, column=2, value=last_payment)
@@ -344,8 +351,7 @@ saved_name = str(ws.cell(row=index, column=1).value)
 
 main_window_of_gui = tkinter.Tk()
 main_window_of_gui.title("sandbox")
-main_window_of_gui.wm_attributes("-topmost", 1)
-main_window_of_gui.geometry("500x500") #You want the size of the app to be 500x500
+main_window_of_gui.geometry("500x500")
 main_window_of_gui.resizable(0, 0)
 
 button_start_new_work = Button(main_window_of_gui, text="Nouvelle facture", width=20, height=3, command=open_details_entry)
