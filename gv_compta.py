@@ -72,7 +72,7 @@ def create_bill_excel_file_if_it_was_not_there(bill_object):
 
 
 def create_summary_excel_file_if_it_was_not_there():
-    if "GV compta synthese.xlsx" not in get_existing_excel_names():
+    if "GV compta synthese.xlsx" not in get_file_names_in_script_directory():
         wb = Workbook()
         ws = wb.active
         ws.cell(row=1, column=1, value="Budget")
@@ -85,17 +85,16 @@ def update_summary_excel_file():
     already_spent = 0
     going_to_spend = 0
     for bill in LIST_OF_BILLS:
-        if bill.work_status == "Canceled":
-            pass
         if bill.work_status == "Finished":
             already_spent += int(bill.price)
-        else:
+        if bill.work_status == "Not started" or bill.work_status == "Started":
             going_to_spend += int(bill.price)
     wb = load_workbook("GV compta synthese.xlsx")
     ws = wb.worksheets[0]
     ws.cell(row=2, column=2, value=going_to_spend)
     ws.cell(row=3, column=2, value=already_spent)
     wb.save("GV compta synthese.xlsx")
+    update_meta_data_in_root()
 
 def find_the_next_empty_row(ws):
     row_index = 1
@@ -492,6 +491,13 @@ def unblock_root_buttons():
     button_start_new_work.config(state="normal")
     button_view_ongoing_work.config(state="normal")
 
+def update_meta_data_in_root():
+    wb = load_workbook("GV compta synthese.xlsx")
+    ws = wb.worksheets[0]
+    var_budget.set(str(ws.cell(row=1, column=2).value))
+    var_will_spend.set(str(ws.cell(row=2, column=2).value))
+    var_already_spent.set(str(ws.cell(row=3, column=2).value))
+    wb.close()
 
 '''
 writing a value to a cell
@@ -503,12 +509,17 @@ saved_name = str(ws.cell(row=index, column=1).value)
 '''
 
 create_summary_excel_file_if_it_was_not_there()
-update_summary_excel_file()
+
 
 main_window_of_gui = tkinter.Tk()
 main_window_of_gui.title("sandbox")
 main_window_of_gui.geometry("500x500")
 main_window_of_gui.resizable(0, 0)
+
+var_budget = StringVar()
+var_will_spend = StringVar()
+var_already_spent = StringVar()
+
 
 button_start_new_work = Button(main_window_of_gui, text="Nouvelle facture", width=20, height=3, command=new_bill)
 button_start_new_work.grid(row=0, column=0)
@@ -516,5 +527,15 @@ button_start_new_work.grid(row=0, column=0)
 button_view_ongoing_work = Button(main_window_of_gui, text="Facture en cours", width=20, height=3, command=open_ongoing_view)
 button_view_ongoing_work.grid(row=0, column=1)
 
+label_budget = Label(main_window_of_gui, textvariable = var_budget)
+label_budget.grid(row=1, column=1)
+
+label_will_spend = Label(main_window_of_gui, textvariable = var_will_spend)
+label_will_spend.grid(row=2, column=1)
+
+label_already_spent = Label(main_window_of_gui, textvariable = var_already_spent)
+label_already_spent.grid(row=3, column=1)
+
+update_meta_data_in_root()
 
 main_window_of_gui.mainloop()
