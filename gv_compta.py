@@ -71,6 +71,16 @@ def create_bill_excel_file_if_it_was_not_there(bill_object):
         wb.save(bill_object.excel_file_name)
 
 
+def create_summary_excel_file_if_it_was_not_there():
+    if "GV compta synthese.xlsx" not in get_existing_excel_names():
+        wb = Workbook()
+        ws = wb.active
+        ws.cell(row=1, column=1, value="Budget")
+        ws.cell(row=2, column=1, value="Depenses prevus")
+        ws.cell(row=3, column=1, value="Depenses effectives")
+        wb.save("GV compta synthese.xlsx")
+
+
 def find_the_next_empty_row(ws):
     row_index = 1
     cell_to_check = ws.cell(row = row_index, column = 1)
@@ -99,84 +109,166 @@ def create_missing_sheet_if_it_was_not_there(bill_object):
 def toplevel_was_closed(evt):
     unblock_root_buttons()
 
-def open_details_entry():
+def new_bill():
     bloc_root_buttons()
     today_date_yyyy_mm_dd = get_date_dd_mm_yyyy()
     update_work_type_list()
-    window_details_entry = Toplevel()
+    window_new_bill = Toplevel()
     x = main_window_of_gui.winfo_x()
     y = main_window_of_gui.winfo_y()
     w = main_window_of_gui.winfo_width()
     h = main_window_of_gui.winfo_height()
     
-    window_details_entry.geometry("%dx%d+%d+%d" % (w, h, x, y))
-    window_details_entry.title("Informations additionelles")
-    window_details_entry.wm_attributes("-topmost", 1)
+    window_new_bill.geometry("%dx%d+%d+%d" % (w, h, x, y))
+    window_new_bill.title("Informations additionelles")
+    window_new_bill.wm_attributes("-topmost", 1)
     
-    label_work_selection = Label(window_details_entry, text = "Type de traveaux :", width=15)
+    label_work_selection = Label(window_new_bill, text = "Type de traveaux :", width=15)
     label_work_selection.grid(column=0, row=0, pady=5)
 
-    combo_work_selection = Combobox(window_details_entry, values = LIST_TYPE_OF_WORK)
+    combo_work_selection = Combobox(window_new_bill, values = LIST_TYPE_OF_WORK)
     combo_work_selection.grid(column=1, row=0, columnspan=2, pady=5)
+    combo_work_selection.bind("<<ComboboxSelected>>", lambda evt: update_company_name_list(combo_work_selection, combo_company_selection))
+    combo_work_selection.bind("<Return>", lambda evt: update_company_name_list(combo_work_selection, combo_company_selection))
 
-    label_company_selection = Label(window_details_entry, text = "Nom de l'entreprise :", width=15)
+    label_company_selection = Label(window_new_bill, text = "Nom de l'entreprise :", width=15)
     label_company_selection.grid(column=0, row=1, pady=5)
 
-    combo_company_selection = Combobox(window_details_entry, values = LIST_OF_COMPANIES)
+    combo_company_selection = Combobox(window_new_bill, values = LIST_OF_COMPANIES)
     combo_company_selection.grid(column=1, row=1, columnspan=2, pady=5)
     
 
-    label_price = Label(window_details_entry, text = "Prix :", width=15)
+    label_price = Label(window_new_bill, text = "Prix :", width=15)
     label_price.grid(column=0, row=2, pady=5)
 
-    entry_price = Entry(window_details_entry, width=23)
+    entry_price = Entry(window_new_bill, width=23)
     entry_price.grid(column=1, row=2, columnspan=2, pady=5)
 
-    label_start_date = Label(window_details_entry, text = "Date de debut :", width=15)
+    label_start_date = Label(window_new_bill, text = "Date de debut :", width=15)
     label_start_date.grid(column=0, row=3, pady=5)
 
-    entry_start_date = Entry(window_details_entry, width=23)
+    entry_start_date = Entry(window_new_bill, width=23)
     entry_start_date.insert(0, today_date_yyyy_mm_dd)
     entry_start_date.grid(column=1, row=3, columnspan=2, pady=5)
 
-    label_end_date = Label(window_details_entry, text = "Date de fin :", width=15)
+    label_end_date = Label(window_new_bill, text = "Date de fin :", width=15)
     label_end_date.grid(column=0, row=4, pady=5)
 
-    entry_end_date = Entry(window_details_entry, width=23)
+    entry_end_date = Entry(window_new_bill, width=23)
     entry_end_date.insert(0, today_date_yyyy_mm_dd)
     entry_end_date.grid(column=1, row=4, columnspan=2, pady=5)
 
-    label_status = Label(window_details_entry, text = "Etat de traveaux :", width=15)
+    label_status = Label(window_new_bill, text = "Etat de traveaux :", width=15)
     label_status.grid(column=0, row=5, pady=5)
 
     var_work_status = StringVar()
     var_work_status.set(LIST_WORK_STATUS[0])
-    dropdown_work_status = OptionMenu(window_details_entry, var_work_status, *LIST_WORK_STATUS)
+    dropdown_work_status = OptionMenu(window_new_bill, var_work_status, *LIST_WORK_STATUS)
     dropdown_work_status.grid(column=1, row=5, columnspan=2, pady=5)
     dropdown_work_status.config(width=18)
 
-    label_comment = Label(window_details_entry, text = "Commentaires :", width=15)
+    label_comment = Label(window_new_bill, text = "Commentaires :", width=15)
     label_comment.grid(column=0, row=6, columnspan=3, pady=5)
 
-    text_comment = Text(window_details_entry, width=60, height=10)
+    text_comment = Text(window_new_bill, width=60, height=10)
     text_comment.grid(column=0, row=7, columnspan=3, pady=5)
 
     data_entries = [combo_work_selection, combo_company_selection, text_comment, entry_start_date, entry_end_date, entry_price, var_work_status]
 
-    button_confirm_details_entry = Button(window_details_entry, text="Selectioner", width=10, height=3, command=lambda: confirm_details_entry(data_entries, window_details_entry))
-    button_confirm_details_entry.grid(column=0, row=8, pady=5)
+    button_confirm_new_bill = Button(window_new_bill, text="Selectioner", width=10, height=3, command=lambda: confirm_new_bill(data_entries, window_new_bill))
+    button_confirm_new_bill.grid(column=0, row=8, pady=5)
 
-    button_cancel_details_entry = Button(window_details_entry, text="Annuler", width=10, height=3, command=lambda: cancel_current_window(window_details_entry))
-    button_cancel_details_entry.grid(column=2, row=8, pady=5)
+    button_cancel_new_bill = Button(window_new_bill, text="Annuler", width=10, height=3, command=lambda: cancel_current_window(window_new_bill))
+    button_cancel_new_bill.grid(column=2, row=8, pady=5)
 
-    button_cancel_details_entry.bind("<Destroy>", toplevel_was_closed)  # if bind on toplevel, the destruction of all widgets in toplevel trigers the function
+    button_cancel_new_bill.bind("<Destroy>", toplevel_was_closed)  # if bind on toplevel, the destruction of all widgets in toplevel trigers the function
+
+
+def existing_bill(bill_to_edit):
+    bloc_root_buttons()
+    window_bill_update = Toplevel()
+    x = main_window_of_gui.winfo_x()
+    y = main_window_of_gui.winfo_y()
+    w = main_window_of_gui.winfo_width()
+    h = main_window_of_gui.winfo_height()
+    
+    window_bill_update.geometry("%dx%d+%d+%d" % (w, h, x, y))
+    window_bill_update.title("Editer une facture existente")
+    window_bill_update.wm_attributes("-topmost", 1)
+    
+    label_work_selection = Label(window_bill_update, text = "Type de traveaux :", width=15)
+    label_work_selection.grid(column=0, row=0, pady=5)
+
+    combo_work_selection = Combobox(window_bill_update, values = LIST_TYPE_OF_WORK)
+    combo_work_selection.grid(column=1, row=0, columnspan=2, pady=5)
+    combo_work_selection.set(bill_to_edit.work_type)
+    combo_work_selection.config(state="disabled")
+
+
+    label_company_selection = Label(window_bill_update, text = "Nom de l'entreprise :", width=15)
+    label_company_selection.grid(column=0, row=1, pady=5)
+
+    combo_company_selection = Combobox(window_bill_update, values = LIST_OF_COMPANIES)
+    combo_company_selection.grid(column=1, row=1, columnspan=2, pady=5)
+    combo_company_selection.set(bill_to_edit.company_name)
+    combo_company_selection.config(state="disabled")
+
+
+    label_price = Label(window_bill_update, text = "Prix :", width=15)
+    label_price.grid(column=0, row=2, pady=5)
+
+
+    entry_price = Entry(window_bill_update, width=23)
+    entry_price.grid(column=1, row=2, columnspan=2, pady=5)
+    entry_price.insert(0, bill_to_edit.price)
+
+    label_start_date = Label(window_bill_update, text = "Date de debut :", width=15)
+    label_start_date.grid(column=0, row=3, pady=5)
+
+    entry_start_date = Entry(window_bill_update, width=23)
+    entry_start_date.insert(0, bill_to_edit.start_date)
+    entry_start_date.grid(column=1, row=3, columnspan=2, pady=5)
+
+    label_end_date = Label(window_bill_update, text = "Date de fin :", width=15)
+    label_end_date.grid(column=0, row=4, pady=5)
+
+    entry_end_date = Entry(window_bill_update, width=23)
+    entry_end_date.insert(0, bill_to_edit.end_date)
+    entry_end_date.grid(column=1, row=4, columnspan=2, pady=5)
+
+    label_status = Label(window_bill_update, text = "Etat de traveaux :", width=15)
+    label_status.grid(column=0, row=5, pady=5)
+
+    var_work_status = StringVar()
+    var_work_status.set(bill_to_edit.work_status)
+    dropdown_work_status = OptionMenu(window_bill_update, var_work_status, *LIST_WORK_STATUS)
+    dropdown_work_status.grid(column=1, row=5, columnspan=2, pady=5)
+    dropdown_work_status.config(width=18)
+
+    label_comment = Label(window_bill_update, text = "Commentaires :", width=15)
+    label_comment.grid(column=0, row=6, columnspan=3, pady=5)
+
+    text_comment = Text(window_bill_update, width=60, height=10)
+    text_comment.grid(column=0, row=7, columnspan=3, pady=5)
+    text_comment.insert(END, bill_to_edit.comment)
+    
+    row_placement = bill_to_edit.row_placement
+    data_entries = [combo_work_selection, combo_company_selection, text_comment, entry_start_date, entry_end_date, entry_price, var_work_status, row_placement]
+
+    button_confirm_bill_update = Button(window_bill_update, text="Selectioner", width=10, height=3, command=lambda: confirm_bill_update(data_entries, window_bill_update))
+    button_confirm_bill_update.grid(column=0, row=8, pady=5)
+
+    button_cancel_bill_update = Button(window_bill_update, text="Annuler", width=10, height=3, command=lambda: cancel_current_window(window_bill_update))
+    button_cancel_bill_update.grid(column=2, row=8, pady=5)
+
+    button_cancel_bill_update.bind("<Destroy>", toplevel_was_closed)  # if bind on toplevel, the destruction of all widgets in toplevel trigers the function
 
 
 def cancel_current_window(window_to_close):
     window_to_close.destroy()
 
 
-def confirm_details_entry(data_entries, window_to_close):
+def confirm_new_bill(data_entries, window_to_close):
     bill_object = Bill()
     bill_object.work_type = data_entries[0].get()
     bill_object.company_name = data_entries[1].get()
@@ -189,21 +281,42 @@ def confirm_details_entry(data_entries, window_to_close):
 
     create_bill_excel_file_if_it_was_not_there(bill_object)
     create_missing_sheet_if_it_was_not_there(bill_object)
-    save_first_entry(bill_object)
+    save_bill_in_excel(bill_object)
     cancel_current_window(window_to_close)
 
 
-def save_first_entry(bill_object):
+def confirm_bill_update(data_entries, window_to_close):
+    bill_object = Bill()
+    bill_object.work_type = data_entries[0].get()
+    bill_object.company_name = data_entries[1].get()
+    bill_object.comment = data_entries[2].get('1.0', 'end-1c')
+    bill_object.start_date = data_entries[3].get()
+    bill_object.end_date = data_entries[4].get()
+    bill_object.price = data_entries[5].get()
+    bill_object.work_status = data_entries[6].get()
+    bill_object.row_placement = data_entries[7]
+    bill_object.set_excel_name()
+
+    create_bill_excel_file_if_it_was_not_there(bill_object)
+    create_missing_sheet_if_it_was_not_there(bill_object)
+    save_bill_in_excel(bill_object)
+    cancel_current_window(window_to_close)
+
+
+def save_bill_in_excel(bill_object):
     wb = load_workbook(bill_object.excel_file_name)
     ws = wb[bill_object.company_name]
-    new_row = find_the_next_empty_row(ws)
-    ws.cell(row=new_row, column=1, value=bill_object.work_type)
-    ws.cell(row=new_row, column=2, value=bill_object.company_name)
-    ws.cell(row=new_row, column=3, value=bill_object.comment)
-    ws.cell(row=new_row, column=4, value=bill_object.start_date)
-    ws.cell(row=new_row, column=5, value=bill_object.end_date)
-    ws.cell(row=new_row, column=6, value=bill_object.price)
-    ws.cell(row=new_row, column=7, value=bill_object.work_status)
+    if bill_object.row_placement == "":
+        row_of_this_bill = find_the_next_empty_row(ws)
+    else:
+        row_of_this_bill = int(bill_object.row_placement)
+    ws.cell(row=row_of_this_bill, column=1, value=bill_object.work_type)
+    ws.cell(row=row_of_this_bill, column=2, value=bill_object.company_name)
+    ws.cell(row=row_of_this_bill, column=3, value=bill_object.comment)
+    ws.cell(row=row_of_this_bill, column=4, value=bill_object.start_date)
+    ws.cell(row=row_of_this_bill, column=5, value=bill_object.end_date)
+    ws.cell(row=row_of_this_bill, column=6, value=bill_object.price)
+    ws.cell(row=row_of_this_bill, column=7, value=bill_object.work_status)
 
     wb.save(bill_object.excel_file_name)
 
@@ -237,15 +350,26 @@ def update_company_name_list(combo_work_selection, combo_company_selection):
         wb.close()
         combo_company_selection['values'] = LIST_OF_COMPANIES
         combo_company_selection.current(0)
+    combo_company_selection.focus_set()
 
-def onselect(evt):
-    global LIST_OF_BILLS
-    # Note here that Tkinter passes an event object to onselect()
+def doube_click_bill_line(evt, window_to_close):
     clicked_widger = evt.widget
     row_id = clicked_widger.selection()[0] #particular line that is selected
-    print(clicked_widger.item(row_id))
     text = clicked_widger.item(row_id, 'text')
-    print('You selected item ', row_id, text)
+    
+    bill_to_edit = Bill()
+    bill_to_edit.row_placement = clicked_widger.item(row_id, 'text')
+    bill_to_edit.work_type = clicked_widger.item(row_id, 'values')[0]
+    bill_to_edit.company_name = clicked_widger.item(row_id, 'values')[1]
+    bill_to_edit.comment = clicked_widger.item(row_id, 'values')[2]
+    bill_to_edit.start_date = clicked_widger.item(row_id, 'values')[3]
+    bill_to_edit.end_date = clicked_widger.item(row_id, 'values')[4]
+    bill_to_edit.price = clicked_widger.item(row_id, 'values')[5]
+    bill_to_edit.work_status = clicked_widger.item(row_id, 'values')[6]
+    bill_to_edit.set_excel_name()
+    
+    existing_bill(bill_to_edit)
+    cancel_current_window(window_to_close)
 
 
 def treeview_sort_column(tv, col, reverse):
@@ -264,17 +388,17 @@ def treeview_sort_column(tv, col, reverse):
 def open_ongoing_view():
     bloc_root_buttons()
     get_list_of_bills()
-    window_details_entry = Toplevel()
+    window_new_bill = Toplevel()
     x = main_window_of_gui.winfo_x()
     y = main_window_of_gui.winfo_y()
     w = main_window_of_gui.winfo_width()
     h = main_window_of_gui.winfo_height()
     
-    window_details_entry.geometry("%dx%d+%d+%d" % (w, h, x, y))
-    window_details_entry.title("Factures en cours")
-    window_details_entry.wm_attributes("-topmost", 1)
+    window_new_bill.geometry("%dx%d+%d+%d" % (w, h, x, y))
+    window_new_bill.title("Factures en cours")
+    window_new_bill.wm_attributes("-topmost", 1)
         
-    frame_for_the_list = Frame(window_details_entry)
+    frame_for_the_list = Frame(window_new_bill)
     frame_for_the_list.grid(column=0, row=0)
     
     tv_columns = ('work_type', 'company_name', 'comment', "start_date", "end_date", "price", "work_status")
@@ -292,21 +416,20 @@ def open_ongoing_view():
 
     treeview_details_of_ongoing_bills.pack()
     for bill in LIST_OF_BILLS:
-        for i in range(10):
-            treeview_details_of_ongoing_bills.insert('', 'end', text=str(bill.row_placement), 
-                                values=(
-                                    bill.work_type + str(i),
-                                    bill.company_name + str(i),
-                                    bill.comment + str(i),
-                                    bill.start_date + str(i),
-                                    bill.end_date + str(i),
-                                    bill.price + str(i),
-                                    bill.work_status + str(i)
-                                ))
-    treeview_details_of_ongoing_bills.bind('<Double-1>', onselect)
+        treeview_details_of_ongoing_bills.insert('', 'end', text=str(bill.row_placement), 
+                            values=(
+                                bill.work_type,
+                                bill.company_name,
+                                bill.comment,
+                                bill.start_date,
+                                bill.end_date,
+                                bill.price,
+                                bill.work_status
+                            ))
+    treeview_details_of_ongoing_bills.bind('<Double-1>', lambda event: doube_click_bill_line(event, window_new_bill))
     treeview_details_of_ongoing_bills.configure(yscrollcommand=scrollbar.set)
 
-    button = Button(window_details_entry, text="OK")
+    button = Button(window_new_bill, text="OK")
     button.grid(column=0, row=1)
 
     treeview_details_of_ongoing_bills.bind("<Destroy>", toplevel_was_closed)  # if bind on toplevel, the destruction of all widgets in toplevel trigers the function
@@ -362,12 +485,14 @@ saved_name = str(ws.cell(row=index, column=1).value)
 
 '''
 
+create_summary_excel_file_if_it_was_not_there()
+
 main_window_of_gui = tkinter.Tk()
 main_window_of_gui.title("sandbox")
 main_window_of_gui.geometry("500x500")
 main_window_of_gui.resizable(0, 0)
 
-button_start_new_work = Button(main_window_of_gui, text="Nouvelle facture", width=20, height=3, command=open_details_entry)
+button_start_new_work = Button(main_window_of_gui, text="Nouvelle facture", width=20, height=3, command=new_bill)
 button_start_new_work.grid(row=0, column=0)
 
 button_view_ongoing_work = Button(main_window_of_gui, text="Facture en cours", width=20, height=3, command=open_ongoing_view)
