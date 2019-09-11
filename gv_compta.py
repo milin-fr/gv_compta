@@ -75,9 +75,21 @@ def create_summary_excel_file_if_it_was_not_there():
     if "GV compta synthese.xlsx" not in get_file_names_in_script_directory():
         wb = Workbook()
         ws = wb.active
+        ws.title = "Synthese"
         ws.cell(row=1, column=1, value="Budget")
         ws.cell(row=2, column=1, value="Depenses prevus")
         ws.cell(row=3, column=1, value="Depenses effectives")
+        wb.create_sheet("Par type de traveaux")
+        ws = wb["Par type de traveaux"]
+        ws.cell(row=1, column=1, value="Type de traveaux")
+        ws.cell(row=1, column=2, value="Depenses prevus")
+        ws.cell(row=1, column=2, value="Depenses effectives")
+        
+        wb.create_sheet("Par entreprise")
+        ws = wb["Par entreprise"]
+        ws.cell(row=1, column=1, value="Nom de l'entreprise")
+        ws.cell(row=1, column=2, value="Depenses prevus")
+        ws.cell(row=1, column=2, value="Depenses effectives")
         wb.save("GV compta synthese.xlsx")
 
 def update_summary_excel_file():
@@ -90,7 +102,7 @@ def update_summary_excel_file():
         if bill.work_status == "Not started" or bill.work_status == "Started":
             going_to_spend += int(bill.price)
     wb = load_workbook("GV compta synthese.xlsx")
-    ws = wb.worksheets[0]
+    ws = wb["Synthese"]
     ws.cell(row=2, column=2, value=going_to_spend)
     ws.cell(row=3, column=2, value=already_spent)
     wb.save("GV compta synthese.xlsx")
@@ -493,7 +505,7 @@ def unblock_root_buttons():
 
 def update_meta_data_in_root():
     wb = load_workbook("GV compta synthese.xlsx")
-    ws = wb.worksheets[0]
+    ws = wb["Synthese"]
     var_budget.set(str(ws.cell(row=1, column=2).value))
     var_will_spend.set(str(ws.cell(row=2, column=2).value))
     var_already_spent.set(str(ws.cell(row=3, column=2).value))
@@ -536,6 +548,6 @@ label_will_spend.grid(row=2, column=1)
 label_already_spent = Label(main_window_of_gui, textvariable = var_already_spent)
 label_already_spent.grid(row=3, column=1)
 
-update_meta_data_in_root()
+update_summary_excel_file()
 
 main_window_of_gui.mainloop()
