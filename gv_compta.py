@@ -83,17 +83,23 @@ def create_summary_excel_file_if_it_was_not_there():
         ws = wb["Par type de traveaux"]
         ws.cell(row=1, column=1, value="Type de traveaux")
         ws.cell(row=1, column=2, value="Depenses prevus")
-        ws.cell(row=1, column=2, value="Depenses effectives")
+        ws.cell(row=1, column=3, value="Depenses effectives")
         
         wb.create_sheet("Par entreprise")
         ws = wb["Par entreprise"]
         ws.cell(row=1, column=1, value="Nom de l'entreprise")
         ws.cell(row=1, column=2, value="Depenses prevus")
-        ws.cell(row=1, column=2, value="Depenses effectives")
+        ws.cell(row=1, column=3, value="Depenses effectives")
         wb.save("GV compta synthese.xlsx")
 
 def update_summary_excel_file():
     get_list_of_bills()
+    update_synthese_sheet()
+    update_work_type_sheet()
+    update_company_sheet()
+    update_meta_data_in_root()
+
+def update_synthese_sheet():
     already_spent = 0
     going_to_spend = 0
     for bill in LIST_OF_BILLS:
@@ -106,7 +112,53 @@ def update_summary_excel_file():
     ws.cell(row=2, column=2, value=going_to_spend)
     ws.cell(row=3, column=2, value=already_spent)
     wb.save("GV compta synthese.xlsx")
-    update_meta_data_in_root()
+
+def update_work_type_sheet():
+    list_of_work_types = []
+    for bill in LIST_OF_BILLS:
+        if bill.work_type not in list_of_work_types:
+            list_of_work_types.append(bill.work_type)
+    wb = load_workbook("GV compta synthese.xlsx")
+    ws = wb["Par type de traveaux"]
+    row_index = 2
+    for work_type in list_of_work_types:
+        already_spent = 0
+        going_to_spend = 0
+        for bill in LIST_OF_BILLS:
+            if bill.work_type == work_type:
+                if bill.work_status == "Finished":
+                    already_spent += int(bill.price)
+                if bill.work_status == "Not started" or bill.work_status == "Started":
+                    going_to_spend += int(bill.price)
+                ws.cell(row=row_index, column=1, value=bill.work_type)
+                ws.cell(row=row_index, column=2, value=going_to_spend)
+                ws.cell(row=row_index, column=3, value=already_spent)
+        row_index +=1
+    wb.save("GV compta synthese.xlsx")
+
+def update_company_sheet():
+    list_of_companies = []
+    for bill in LIST_OF_BILLS:
+        if bill.company_name not in list_of_companies:
+            list_of_companies.append(bill.company_name)
+    wb = load_workbook("GV compta synthese.xlsx")
+    ws = wb["Par entreprise"]
+    row_index = 2
+    for company_name in list_of_companies:
+        already_spent = 0
+        going_to_spend = 0
+        for bill in LIST_OF_BILLS:
+            if bill.company_name == company_name:
+                if bill.work_status == "Finished":
+                    already_spent += int(bill.price)
+                if bill.work_status == "Not started" or bill.work_status == "Started":
+                    going_to_spend += int(bill.price)
+                ws.cell(row=row_index, column=1, value=bill.company_name)
+                ws.cell(row=row_index, column=2, value=going_to_spend)
+                ws.cell(row=row_index, column=3, value=already_spent)
+        row_index +=1
+    wb.save("GV compta synthese.xlsx")
+
 
 def find_the_next_empty_row(ws):
     row_index = 1
