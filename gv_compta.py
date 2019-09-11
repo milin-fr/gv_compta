@@ -109,13 +109,13 @@ def update_synthese_sheet():
     going_to_spend = 0
     for bill in LIST_OF_BILLS:
         if bill.work_status == "Finished":
-            already_spent += int(bill.price)
+            already_spent += float(bill.price)
         if bill.work_status == "Not started" or bill.work_status == "Started":
-            going_to_spend += int(bill.price)
+            going_to_spend += float(bill.price)
     wb = load_workbook("GV compta synthese.xlsx")
     ws = wb["Synthese"]
     try:
-        budget = int(ws.cell(row=1, column=2).value)
+        budget = float(ws.cell(row=1, column=2).value)
     except:
         budget = 0
     budget_leftover_estimation = budget - going_to_spend
@@ -141,9 +141,9 @@ def update_work_type_sheet():
         for bill in LIST_OF_BILLS:
             if bill.work_type == work_type:
                 if bill.work_status == "Finished":
-                    already_spent += int(bill.price)
+                    already_spent += float(bill.price)
                 if bill.work_status == "Not started" or bill.work_status == "Started":
-                    going_to_spend += int(bill.price)
+                    going_to_spend += float(bill.price)
                 ws.cell(row=row_index, column=1, value=bill.work_type)
                 ws.cell(row=row_index, column=2, value=going_to_spend)
                 ws.cell(row=row_index, column=3, value=already_spent)
@@ -164,9 +164,9 @@ def update_company_sheet():
         for bill in LIST_OF_BILLS:
             if bill.company_name == company_name:
                 if bill.work_status == "Finished":
-                    already_spent += int(bill.price)
+                    already_spent += float(bill.price)
                 if bill.work_status == "Not started" or bill.work_status == "Started":
-                    going_to_spend += int(bill.price)
+                    going_to_spend += float(bill.price)
                 ws.cell(row=row_index, column=1, value=bill.company_name)
                 ws.cell(row=row_index, column=2, value=going_to_spend)
                 ws.cell(row=row_index, column=3, value=already_spent)
@@ -368,7 +368,7 @@ def confirm_new_bill(data_entries, window_to_close):
     bill_object.comment = data_entries[2].get('1.0', 'end-1c')
     bill_object.start_date = data_entries[3].get()
     bill_object.end_date = data_entries[4].get()
-    bill_object.price = data_entries[5].get()
+    bill_object.price = data_entries[5].get().replace(",", ".")
     bill_object.work_status = data_entries[6].get()
     bill_object.set_excel_name()
 
@@ -402,7 +402,7 @@ def save_bill_in_excel(bill_object):
     if bill_object.row_placement == "":
         row_of_this_bill = find_the_next_empty_row(ws)
     else:
-        row_of_this_bill = int(bill_object.row_placement)
+        row_of_this_bill = float(bill_object.row_placement)
     ws.cell(row=row_of_this_bill, column=1, value=bill_object.work_type)
     ws.cell(row=row_of_this_bill, column=2, value=bill_object.company_name)
     ws.cell(row=row_of_this_bill, column=3, value=bill_object.comment)
@@ -571,8 +571,8 @@ def unblock_root_buttons():
 
 def update_meta_data_in_root():
     create_global_meta_treeview()
-    create_work_type_meta_treeview()
-    create_company_meta_treeview()
+    update_work_type_meta_treeview()
+    update_company_meta_treeview()
 
 def create_global_meta_treeview():
     var_budget = StringVar()
@@ -615,16 +615,8 @@ def create_global_meta_treeview():
     label_already_spent = Label(frame_global_meta_tree_view, textvariable=var_already_spent)
     label_already_spent.grid(column=1, row=4, sticky="e")
 
-def create_work_type_meta_treeview():
-    tv_work_type_colums = ("Type de traveaux", "Depenses prevus", "Depenses effectives")
-    tv_work_type = Treeview(frame_work_type_meta_tree_view, columns=tv_work_type_colums, show='headings')
-    for column in tv_work_type_colums:
-        tv_work_type.heading(column, text=column, command=lambda col=column: treeview_sort_column(tv_work_type, col, False))
-        tv_work_type.column(column, anchor='center', width=150)
-    scrollbar = Scrollbar(frame_work_type_meta_tree_view, command=tv_work_type.yview)
-    scrollbar.pack(side=RIGHT, fill=Y)
-    tv_work_type.pack()
-
+def update_work_type_meta_treeview():
+    tv_work_type.delete(*tv_work_type.get_children())
     wb = load_workbook("GV compta synthese.xlsx")
     ws = wb["Par type de traveaux"]
     empty_row = find_the_next_empty_row(ws)
@@ -637,16 +629,8 @@ def create_work_type_meta_treeview():
                                 ))
     wb.close()
 
-def create_company_meta_treeview():
-    tv_company_name_colums = ("Nom de l'entreprise", "Depenses prevus", "Depenses effectives")
-    tv_company_name = Treeview(frame_company_meta_tree_view, columns=tv_company_name_colums, show='headings')
-    for column in tv_company_name_colums:
-        tv_company_name.heading(column, text=column, command=lambda col=column: treeview_sort_column(tv_company_name, col, False))
-        tv_company_name.column(column, anchor='center', width=150)
-    scrollbar = Scrollbar(frame_company_meta_tree_view, command=tv_company_name.yview)
-    scrollbar.pack(side=RIGHT, fill=Y)
-    tv_company_name.pack()
-
+def update_company_meta_treeview():
+    tv_company_name.delete(*tv_company_name.get_children())
     wb = load_workbook("GV compta synthese.xlsx")
     ws = wb["Par entreprise"]
     empty_row = find_the_next_empty_row(ws)
@@ -694,11 +678,29 @@ label_global_meta_tree_view.grid(column=2, row=1, columnspan=2)
 frame_work_type_meta_tree_view = Frame(main_window_of_gui)
 frame_work_type_meta_tree_view.grid(column=2, row=2, columnspan=2)
 
+tv_work_type_colums = ("Type de traveaux", "Depenses prevus", "Depenses effectives")
+tv_work_type = Treeview(frame_work_type_meta_tree_view, columns=tv_work_type_colums, show='headings')
+for column in tv_work_type_colums:
+    tv_work_type.heading(column, text=column, command=lambda col=column: treeview_sort_column(tv_work_type, col, False))
+    tv_work_type.column(column, anchor='center', width=150)
+scrollbar = Scrollbar(frame_work_type_meta_tree_view, command=tv_work_type.yview)
+scrollbar.pack(side=RIGHT, fill=Y)
+tv_work_type.pack()
+
 label_global_meta_tree_view = Label(main_window_of_gui, text="Donnees par entreprise :")
 label_global_meta_tree_view.grid(column=4, row=1, columnspan=2)
 
 frame_company_meta_tree_view = Frame(main_window_of_gui)
 frame_company_meta_tree_view.grid(column=4, row=2, columnspan=2)
+
+tv_company_name_colums = ("Nom de l'entreprise", "Depenses prevus", "Depenses effectives")
+tv_company_name = Treeview(frame_company_meta_tree_view, columns=tv_company_name_colums, show='headings')
+for column in tv_company_name_colums:
+    tv_company_name.heading(column, text=column, command=lambda col=column: treeview_sort_column(tv_company_name, col, False))
+    tv_company_name.column(column, anchor='center', width=150)
+scrollbar = Scrollbar(frame_company_meta_tree_view, command=tv_company_name.yview)
+scrollbar.pack(side=RIGHT, fill=Y)
+tv_company_name.pack()
 
 update_summary_excel_file()
 
