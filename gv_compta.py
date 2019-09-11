@@ -76,9 +76,11 @@ def create_summary_excel_file_if_it_was_not_there():
         wb = Workbook()
         ws = wb.active
         ws.title = "Synthese"
-        ws.cell(row=1, column=1, value="Budget")
-        ws.cell(row=2, column=1, value="Depenses prevus")
-        ws.cell(row=3, column=1, value="Depenses effectives")
+        ws.cell(row=1, column=1, value="Budget total")
+        ws.cell(row=2, column=1, value="Budget restant estime")
+        ws.cell(row=3, column=1, value="Budget restant effectif")
+        ws.cell(row=4, column=1, value="Depenses prevus")
+        ws.cell(row=5, column=1, value="Depenses effectives")
         wb.create_sheet("Par type de traveaux")
         ws = wb["Par type de traveaux"]
         ws.cell(row=1, column=1, value="Type de traveaux")
@@ -91,6 +93,9 @@ def create_summary_excel_file_if_it_was_not_there():
         ws.cell(row=1, column=2, value="Depenses prevus")
         ws.cell(row=1, column=3, value="Depenses effectives")
         wb.save("GV compta synthese.xlsx")
+        showinfo("Attention !", "Pour le bon fonctionnement du logiciel, merci de saisir le budget total dans le ficher excel dans la case B1 et relancer le logiciel. Le fichier excel va s'ouvrir automatiquement.")
+        os.startfile("GV compta synthese.xlsx")
+
 
 def update_summary_excel_file():
     get_list_of_bills()
@@ -109,8 +114,17 @@ def update_synthese_sheet():
             going_to_spend += int(bill.price)
     wb = load_workbook("GV compta synthese.xlsx")
     ws = wb["Synthese"]
-    ws.cell(row=2, column=2, value=going_to_spend)
-    ws.cell(row=3, column=2, value=already_spent)
+    try:
+        budget = int(ws.cell(row=1, column=2).value)
+    except:
+        budget = 0
+    budget_leftover_estimation = budget - going_to_spend
+    budget_leftover = budget - already_spent
+    
+    ws.cell(row=2, column=2, value=budget_leftover_estimation)
+    ws.cell(row=3, column=2, value=budget_leftover)
+    ws.cell(row=4, column=2, value=going_to_spend)
+    ws.cell(row=5, column=2, value=already_spent)
     wb.save("GV compta synthese.xlsx")
 
 def update_work_type_sheet():
@@ -556,12 +570,75 @@ def unblock_root_buttons():
     button_view_ongoing_work.config(state="normal")
 
 def update_meta_data_in_root():
+    create_global_meta_treeview()
+    create_work_type_meta_treeview()
+
+def create_global_meta_treeview():
+    var_budget = StringVar()
+    var_budget_leftover_estimation = StringVar()
+    var_budget_leftover = StringVar()
+    var_will_spend = StringVar()
+    var_already_spent = StringVar()
+
     wb = load_workbook("GV compta synthese.xlsx")
     ws = wb["Synthese"]
     var_budget.set(str(ws.cell(row=1, column=2).value))
-    var_will_spend.set(str(ws.cell(row=2, column=2).value))
-    var_already_spent.set(str(ws.cell(row=3, column=2).value))
+    var_budget_leftover_estimation.set(str(ws.cell(row=2, column=2).value))
+    var_budget_leftover.set(str(ws.cell(row=3, column=2).value))
+    var_will_spend.set(str(ws.cell(row=4, column=2).value))
+    var_already_spent.set(str(ws.cell(row=5, column=2).value))
     wb.close()
+    
+    label_budget_intro = Label(frame_global_meta_tree_view, text="Budget total :")
+    label_budget_intro.grid(column=0, row=0, sticky="w")
+    label_budget = Label(frame_global_meta_tree_view, textvariable=var_budget)
+    label_budget.grid(column=1, row=0, sticky="e")
+
+    label_budget_leftover_estimation_intro = Label(frame_global_meta_tree_view, text="Budget restant previsionel :")
+    label_budget_leftover_estimation_intro.grid(column=0, row=1, sticky="w")
+    label_budget_leftover_estimation = Label(frame_global_meta_tree_view, textvariable=var_budget_leftover_estimation)
+    label_budget_leftover_estimation.grid(column=1, row=1, sticky="e")
+
+    label_budget_leftover_intro = Label(frame_global_meta_tree_view, text="Budget restant effectif :")
+    label_budget_leftover_intro.grid(column=0, row=2, sticky="w")
+    label_budget_leftover = Label(frame_global_meta_tree_view, textvariable=var_budget_leftover)
+    label_budget_leftover.grid(column=1, row=2, sticky="e")
+
+    label_will_to_spend_intro = Label(frame_global_meta_tree_view, text="Depenses previsioneles :")
+    label_will_to_spend_intro.grid(column=0, row=3, sticky="w")
+    label_will_to_spend = Label(frame_global_meta_tree_view, textvariable=var_will_spend)
+    label_will_to_spend.grid(column=1, row=3, sticky="e")
+
+    label_already_spent_intro = Label(frame_global_meta_tree_view, text="Depenses effectifes :")
+    label_already_spent_intro.grid(column=0, row=4, sticky="w")
+    label_already_spent = Label(frame_global_meta_tree_view, textvariable=var_already_spent)
+    label_already_spent.grid(column=1, row=4, sticky="e")
+
+def create_work_type_meta_treeview():
+    tv_work_type_colums = ("Type de traveaux", "Depenses previsionelles", "Depenses effectives")
+    tv_work_type = Treeview(frame_work_type_meta_tree_view, columns=tv_work_type_colums, show='headings')
+    for column in tv_work_type_colums:
+        tv_work_type.heading(column, text=column, command=lambda col=column: treeview_sort_column(tv_work_type, col, False))
+        tv_work_type.column(column, anchor='center', width=150)
+    scrollbar = Scrollbar(frame_work_type_meta_tree_view, command=tv_work_type.yview)
+    scrollbar.pack(side=RIGHT, fill=Y)
+    tv_work_type.pack()
+
+    wb = load_workbook("GV compta synthese.xlsx")
+    ws = wb["Par type de traveaux"]
+    empty_row = find_the_next_empty_row(ws)
+    for row in range(2, empty_row):
+        tv_work_type.insert('', 'end', text=str(row),
+                                values=(
+                                    str(ws.cell(row=row, column=1).value),
+                                    str(ws.cell(row=row, column=2).value),
+                                    str(ws.cell(row=row, column=3).value)
+                                ))
+    wb.close()
+
+def create_company_meta_treeview():
+    pass
+    
 
 '''
 writing a value to a cell
@@ -577,13 +654,7 @@ create_summary_excel_file_if_it_was_not_there()
 
 main_window_of_gui = tkinter.Tk()
 main_window_of_gui.title("sandbox")
-main_window_of_gui.geometry("500x500")
 main_window_of_gui.resizable(0, 0)
-
-var_budget = StringVar()
-var_will_spend = StringVar()
-var_already_spent = StringVar()
-
 
 button_start_new_work = Button(main_window_of_gui, text="Nouvelle facture", width=20, height=3, command=new_bill)
 button_start_new_work.grid(row=0, column=0)
@@ -591,14 +662,23 @@ button_start_new_work.grid(row=0, column=0)
 button_view_ongoing_work = Button(main_window_of_gui, text="Facture en cours", width=20, height=3, command=open_ongoing_view)
 button_view_ongoing_work.grid(row=0, column=1)
 
-label_budget = Label(main_window_of_gui, textvariable = var_budget)
-label_budget.grid(row=1, column=1)
+label_global_meta_tree_view = Label(main_window_of_gui, text="Donnees d'ensemble :")
+label_global_meta_tree_view.grid(column=0, row=1, columnspan=2)
 
-label_will_spend = Label(main_window_of_gui, textvariable = var_will_spend)
-label_will_spend.grid(row=2, column=1)
+frame_global_meta_tree_view = Frame(main_window_of_gui)
+frame_global_meta_tree_view.grid(column=0, row=2, columnspan=2, sticky="n")
 
-label_already_spent = Label(main_window_of_gui, textvariable = var_already_spent)
-label_already_spent.grid(row=3, column=1)
+label_global_meta_tree_view = Label(main_window_of_gui, text="Donnees par type de traveaux :")
+label_global_meta_tree_view.grid(column=2, row=1, columnspan=2)
+
+frame_work_type_meta_tree_view = Frame(main_window_of_gui)
+frame_work_type_meta_tree_view.grid(column=2, row=2, columnspan=2)
+
+label_global_meta_tree_view = Label(main_window_of_gui, text="Donnees par entreprise :")
+label_global_meta_tree_view.grid(column=4, row=1, columnspan=2)
+
+frame_company_meta_tree_view = Frame(main_window_of_gui)
+frame_company_meta_tree_view.grid(column=4, row=2, columnspan=2)
 
 update_summary_excel_file()
 
