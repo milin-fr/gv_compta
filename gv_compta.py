@@ -79,18 +79,18 @@ def create_summary_excel_file_if_it_was_not_there():
         ws.cell(row=1, column=1, value="Budget total")
         ws.cell(row=2, column=1, value="Budget restant estime")
         ws.cell(row=3, column=1, value="Budget restant effectif")
-        ws.cell(row=4, column=1, value="Depenses prevus")
+        ws.cell(row=4, column=1, value="Depenses prevues")
         ws.cell(row=5, column=1, value="Depenses effectives")
-        wb.create_sheet("Par type de traveaux")
-        ws = wb["Par type de traveaux"]
-        ws.cell(row=1, column=1, value="Type de traveaux")
-        ws.cell(row=1, column=2, value="Depenses prevus")
+        wb.create_sheet("Par type de travaux")
+        ws = wb["Par type de travaux"]
+        ws.cell(row=1, column=1, value="Type de travaux")
+        ws.cell(row=1, column=2, value="Depenses prevues")
         ws.cell(row=1, column=3, value="Depenses effectives")
         
         wb.create_sheet("Par entreprise")
         ws = wb["Par entreprise"]
         ws.cell(row=1, column=1, value="Nom de l'entreprise")
-        ws.cell(row=1, column=2, value="Depenses prevus")
+        ws.cell(row=1, column=2, value="Depenses prevues")
         ws.cell(row=1, column=3, value="Depenses effectives")
         wb.save("GV compta synthese.xlsx")
         showinfo("Attention !", "Pour le bon fonctionnement du logiciel, merci de saisir le budget total dans le ficher excel dans la case B1 et relancer le logiciel. Le fichier excel va s'ouvrir automatiquement.")
@@ -133,7 +133,7 @@ def update_work_type_sheet():
         if bill.work_type not in list_of_work_types:
             list_of_work_types.append(bill.work_type)
     wb = load_workbook("GV compta synthese.xlsx")
-    ws = wb["Par type de traveaux"]
+    ws = wb["Par type de travaux"]
     row_index = 2
     for work_type in list_of_work_types:
         already_spent = 0
@@ -216,7 +216,7 @@ def new_bill():
     window_new_bill.title("Informations additionelles")
     window_new_bill.wm_attributes("-topmost", 1)
     
-    label_work_selection = Label(window_new_bill, text = "Type de traveaux :", width=15)
+    label_work_selection = Label(window_new_bill, text = "Type de travaux :", width=15)
     label_work_selection.grid(column=0, row=0, pady=5)
 
     combo_work_selection = Combobox(window_new_bill, values = LIST_TYPE_OF_WORK)
@@ -251,7 +251,7 @@ def new_bill():
     entry_end_date.insert(0, today_date_yyyy_mm_dd)
     entry_end_date.grid(column=1, row=4, columnspan=2, pady=5)
 
-    label_status = Label(window_new_bill, text = "Etat de traveaux :", width=15)
+    label_status = Label(window_new_bill, text = "Etat de travaux :", width=15)
     label_status.grid(column=0, row=5, pady=5)
 
     var_work_status = StringVar()
@@ -268,7 +268,7 @@ def new_bill():
 
     data_entries = [combo_work_selection, combo_company_selection, text_comment, entry_start_date, entry_end_date, entry_price, var_work_status]
 
-    button_confirm_new_bill = Button(window_new_bill, text="Selectioner", width=10, height=3, command=lambda: confirm_new_bill(data_entries, window_new_bill))
+    button_confirm_new_bill = Button(window_new_bill, text="Confirmer", width=10, height=3, command=lambda: confirm_new_bill(data_entries, window_new_bill))
     button_confirm_new_bill.grid(column=0, row=8, pady=5)
 
     button_cancel_new_bill = Button(window_new_bill, text="Annuler", width=10, height=3, command=lambda: cancel_current_window(window_new_bill))
@@ -289,7 +289,7 @@ def existing_bill(bill_to_edit):
     window_bill_update.title("Editer une facture existente")
     window_bill_update.wm_attributes("-topmost", 1)
     
-    label_work_selection = Label(window_bill_update, text = "Type de traveaux :", width=15)
+    label_work_selection = Label(window_bill_update, text = "Type de travaux :", width=15)
     label_work_selection.grid(column=0, row=0, pady=5)
 
     combo_work_selection = Combobox(window_bill_update, values = LIST_TYPE_OF_WORK)
@@ -329,7 +329,7 @@ def existing_bill(bill_to_edit):
     entry_end_date.insert(0, bill_to_edit.end_date)
     entry_end_date.grid(column=1, row=4, columnspan=2, pady=5)
 
-    label_status = Label(window_bill_update, text = "Etat de traveaux :", width=15)
+    label_status = Label(window_bill_update, text = "Etat de travaux :", width=15)
     label_status.grid(column=0, row=5, pady=5)
 
     var_work_status = StringVar()
@@ -339,16 +339,16 @@ def existing_bill(bill_to_edit):
     dropdown_work_status.config(width=18)
 
     label_comment = Label(window_bill_update, text = "Commentaires :", width=15)
-    label_comment.grid(column=0, row=6, columnspan=3, pady=5)
+    label_comment.grid(column=3, row=0, pady=5)
 
     text_comment = Text(window_bill_update, width=60, height=10)
-    text_comment.grid(column=0, row=7, columnspan=3, pady=5)
+    text_comment.grid(column=3, row=1, rowspan=5, pady=5)
     text_comment.insert(END, bill_to_edit.comment)
     
     row_placement = bill_to_edit.row_placement
     data_entries = [combo_work_selection, combo_company_selection, text_comment, entry_start_date, entry_end_date, entry_price, var_work_status, row_placement]
 
-    button_confirm_bill_update = Button(window_bill_update, text="Selectioner", width=10, height=3, command=lambda: confirm_bill_update(data_entries, window_bill_update))
+    button_confirm_bill_update = Button(window_bill_update, text="Confirmer", width=10, height=3, command=lambda: confirm_bill_update(data_entries, window_bill_update))
     button_confirm_bill_update.grid(column=0, row=8, pady=5)
 
     button_cancel_bill_update = Button(window_bill_update, text="Annuler", width=10, height=3, command=lambda: cancel_current_window(window_bill_update))
@@ -482,17 +482,17 @@ def treeview_sort_column(tv, col, reverse):
 def open_ongoing_view():
     bloc_root_buttons()
     get_list_of_bills()
-    window_new_bill = Toplevel()
+    window_ongoing_bill = Toplevel()
     x = main_window_of_gui.winfo_x()
     y = main_window_of_gui.winfo_y()
     w = main_window_of_gui.winfo_width()
     h = main_window_of_gui.winfo_height()
     
-    window_new_bill.geometry("%dx%d+%d+%d" % (w, h, x, y))
-    window_new_bill.title("Factures en cours")
-    window_new_bill.wm_attributes("-topmost", 1)
+    window_ongoing_bill.geometry("%dx%d+%d+%d" % (w, h, x, y))
+    window_ongoing_bill.title("Factures en cours")
+    window_ongoing_bill.wm_attributes("-topmost", 1)
         
-    frame_for_the_list = Frame(window_new_bill)
+    frame_for_the_list = Frame(window_ongoing_bill)
     frame_for_the_list.grid(column=0, row=0)
     
     tv_columns = ('work_type', 'company_name', 'comment', "start_date", "end_date", "price", "work_status")
@@ -520,11 +520,11 @@ def open_ongoing_view():
                                 bill.price,
                                 bill.work_status
                             ))
-    treeview_details_of_ongoing_bills.bind('<Double-1>', lambda event: doube_click_bill_line(event, window_new_bill))
+    treeview_details_of_ongoing_bills.bind('<Double-1>', lambda event: doube_click_bill_line(event, window_ongoing_bill))
     treeview_details_of_ongoing_bills.configure(yscrollcommand=scrollbar.set)
 
-    button = Button(window_new_bill, text="OK")
-    button.grid(column=0, row=1)
+    label_explanation = Label(window_ongoing_bill, text="Double-click pour editer une facture.")
+    label_explanation.grid(column=0, row=1)
 
     treeview_details_of_ongoing_bills.bind("<Destroy>", toplevel_was_closed)  # if bind on toplevel, the destruction of all widgets in toplevel trigers the function
 
@@ -605,12 +605,12 @@ def create_global_meta_treeview():
     label_budget_leftover = Label(frame_global_meta_tree_view, textvariable=var_budget_leftover)
     label_budget_leftover.grid(column=1, row=2, sticky="e")
 
-    label_will_to_spend_intro = Label(frame_global_meta_tree_view, text="Depenses prevus :")
+    label_will_to_spend_intro = Label(frame_global_meta_tree_view, text="Depenses prevues :")
     label_will_to_spend_intro.grid(column=0, row=3, sticky="w")
     label_will_to_spend = Label(frame_global_meta_tree_view, textvariable=var_will_spend)
     label_will_to_spend.grid(column=1, row=3, sticky="e")
 
-    label_already_spent_intro = Label(frame_global_meta_tree_view, text="Depenses effectifes :")
+    label_already_spent_intro = Label(frame_global_meta_tree_view, text="Depenses effectives :")
     label_already_spent_intro.grid(column=0, row=4, sticky="w")
     label_already_spent = Label(frame_global_meta_tree_view, textvariable=var_already_spent)
     label_already_spent.grid(column=1, row=4, sticky="e")
@@ -618,7 +618,7 @@ def create_global_meta_treeview():
 def update_work_type_meta_treeview():
     tv_work_type.delete(*tv_work_type.get_children())
     wb = load_workbook("GV compta synthese.xlsx")
-    ws = wb["Par type de traveaux"]
+    ws = wb["Par type de travaux"]
     empty_row = find_the_next_empty_row(ws)
     for row in range(2, empty_row):
         tv_work_type.insert('', 'end', text=str(row),
@@ -658,27 +658,16 @@ create_summary_excel_file_if_it_was_not_there()
 
 main_window_of_gui = tkinter.Tk()
 main_window_of_gui.title("sandbox")
+main_window_of_gui.geometry("1000x600")
 main_window_of_gui.resizable(0, 0)
 
-button_start_new_work = Button(main_window_of_gui, text="Nouvelle facture", width=20, height=3, command=new_bill)
-button_start_new_work.grid(row=0, column=0)
-
-button_view_ongoing_work = Button(main_window_of_gui, text="Facture en cours", width=20, height=3, command=open_ongoing_view)
-button_view_ongoing_work.grid(row=0, column=1)
-
-label_global_meta_tree_view = Label(main_window_of_gui, text="Donnees d'ensemble :")
-label_global_meta_tree_view.grid(column=0, row=1, columnspan=2)
-
-frame_global_meta_tree_view = Frame(main_window_of_gui)
-frame_global_meta_tree_view.grid(column=0, row=2, columnspan=2, sticky="n")
-
-label_global_meta_tree_view = Label(main_window_of_gui, text="Donnees par type de traveaux :")
-label_global_meta_tree_view.grid(column=2, row=1, columnspan=2)
+label_work_type_meta_tree_view = Label(main_window_of_gui, text="Donnees par type de travaux :")
+label_work_type_meta_tree_view.grid(column=0, row=0, columnspan=2)
 
 frame_work_type_meta_tree_view = Frame(main_window_of_gui)
-frame_work_type_meta_tree_view.grid(column=2, row=2, columnspan=2)
+frame_work_type_meta_tree_view.grid(column=0, row=1, columnspan=2)
 
-tv_work_type_colums = ("Type de traveaux", "Depenses prevus", "Depenses effectives")
+tv_work_type_colums = ("Type de travaux", "Depenses prevues", "Depenses effectives")
 tv_work_type = Treeview(frame_work_type_meta_tree_view, columns=tv_work_type_colums, show='headings')
 for column in tv_work_type_colums:
     tv_work_type.heading(column, text=column, command=lambda col=column: treeview_sort_column(tv_work_type, col, False))
@@ -687,13 +676,13 @@ scrollbar = Scrollbar(frame_work_type_meta_tree_view, command=tv_work_type.yview
 scrollbar.pack(side=RIGHT, fill=Y)
 tv_work_type.pack()
 
-label_global_meta_tree_view = Label(main_window_of_gui, text="Donnees par entreprise :")
-label_global_meta_tree_view.grid(column=4, row=1, columnspan=2)
+label_company_meta_tree_view = Label(main_window_of_gui, text="Donnees par entreprise :")
+label_company_meta_tree_view.grid(column=2, row=0, columnspan=2)
 
 frame_company_meta_tree_view = Frame(main_window_of_gui)
-frame_company_meta_tree_view.grid(column=4, row=2, columnspan=2)
+frame_company_meta_tree_view.grid(column=2, row=1, columnspan=2)
 
-tv_company_name_colums = ("Nom de l'entreprise", "Depenses prevus", "Depenses effectives")
+tv_company_name_colums = ("Nom de l'entreprise", "Depenses prevues", "Depenses effectives")
 tv_company_name = Treeview(frame_company_meta_tree_view, columns=tv_company_name_colums, show='headings')
 for column in tv_company_name_colums:
     tv_company_name.heading(column, text=column, command=lambda col=column: treeview_sort_column(tv_company_name, col, False))
@@ -701,6 +690,20 @@ for column in tv_company_name_colums:
 scrollbar = Scrollbar(frame_company_meta_tree_view, command=tv_company_name.yview)
 scrollbar.pack(side=RIGHT, fill=Y)
 tv_company_name.pack()
+
+label_global_meta_tree_view = Label(main_window_of_gui, text="Donnees d'ensemble :")
+label_global_meta_tree_view.grid(column=0, row=3, columnspan=2)
+
+frame_global_meta_tree_view = Frame(main_window_of_gui)
+frame_global_meta_tree_view.grid(column=0, row=4, columnspan=2, sticky="n")
+
+button_start_new_work = Button(main_window_of_gui, text="Nouvelle facture", width=20, height=3, command=new_bill)
+button_start_new_work.grid(column=2, row=3)
+
+button_view_ongoing_work = Button(main_window_of_gui, text="Facture en cours", width=20, height=3, command=open_ongoing_view)
+button_view_ongoing_work.grid(column=2, row=4)
+
+
 
 update_summary_excel_file()
 
