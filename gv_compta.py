@@ -572,6 +572,7 @@ def unblock_root_buttons():
 def update_meta_data_in_root():
     create_global_meta_treeview()
     create_work_type_meta_treeview()
+    create_company_meta_treeview()
 
 def create_global_meta_treeview():
     var_budget = StringVar()
@@ -604,7 +605,7 @@ def create_global_meta_treeview():
     label_budget_leftover = Label(frame_global_meta_tree_view, textvariable=var_budget_leftover)
     label_budget_leftover.grid(column=1, row=2, sticky="e")
 
-    label_will_to_spend_intro = Label(frame_global_meta_tree_view, text="Depenses previsioneles :")
+    label_will_to_spend_intro = Label(frame_global_meta_tree_view, text="Depenses prevus :")
     label_will_to_spend_intro.grid(column=0, row=3, sticky="w")
     label_will_to_spend = Label(frame_global_meta_tree_view, textvariable=var_will_spend)
     label_will_to_spend.grid(column=1, row=3, sticky="e")
@@ -615,7 +616,7 @@ def create_global_meta_treeview():
     label_already_spent.grid(column=1, row=4, sticky="e")
 
 def create_work_type_meta_treeview():
-    tv_work_type_colums = ("Type de traveaux", "Depenses previsionelles", "Depenses effectives")
+    tv_work_type_colums = ("Type de traveaux", "Depenses prevus", "Depenses effectives")
     tv_work_type = Treeview(frame_work_type_meta_tree_view, columns=tv_work_type_colums, show='headings')
     for column in tv_work_type_colums:
         tv_work_type.heading(column, text=column, command=lambda col=column: treeview_sort_column(tv_work_type, col, False))
@@ -637,7 +638,26 @@ def create_work_type_meta_treeview():
     wb.close()
 
 def create_company_meta_treeview():
-    pass
+    tv_company_name_colums = ("Nom de l'entreprise", "Depenses prevus", "Depenses effectives")
+    tv_company_name = Treeview(frame_company_meta_tree_view, columns=tv_company_name_colums, show='headings')
+    for column in tv_company_name_colums:
+        tv_company_name.heading(column, text=column, command=lambda col=column: treeview_sort_column(tv_company_name, col, False))
+        tv_company_name.column(column, anchor='center', width=150)
+    scrollbar = Scrollbar(frame_company_meta_tree_view, command=tv_company_name.yview)
+    scrollbar.pack(side=RIGHT, fill=Y)
+    tv_company_name.pack()
+
+    wb = load_workbook("GV compta synthese.xlsx")
+    ws = wb["Par entreprise"]
+    empty_row = find_the_next_empty_row(ws)
+    for row in range(2, empty_row):
+        tv_company_name.insert('', 'end', text=str(row),
+                                values=(
+                                    str(ws.cell(row=row, column=1).value),
+                                    str(ws.cell(row=row, column=2).value),
+                                    str(ws.cell(row=row, column=3).value)
+                                ))
+    wb.close()
     
 
 '''
