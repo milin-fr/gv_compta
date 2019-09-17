@@ -117,7 +117,7 @@ def update_synthese_sheet():
         budget = float(ws.cell(row=1, column=2).value)
     except:
         budget = 0
-    budget_leftover_estimation = budget - going_to_spend
+    budget_leftover_estimation = budget - going_to_spend - already_spent
     budget_leftover = budget - already_spent
     ws.cell(row=2, column=2, value=budget_leftover_estimation)
     ws.cell(row=3, column=2, value=budget_leftover)
@@ -360,7 +360,7 @@ def save_bill_in_excel(bill_object):
     if bill_object.row_placement == "":
         row_of_this_bill = find_the_next_empty_row(ws)
     else:
-        row_of_this_bill = float(bill_object.row_placement)
+        row_of_this_bill = int(bill_object.row_placement)
     ws.cell(row=row_of_this_bill, column=1, value=bill_object.work_type)
     ws.cell(row=row_of_this_bill, column=2, value=bill_object.company_name)
     ws.cell(row=row_of_this_bill, column=3, value=bill_object.comment)
@@ -526,11 +526,11 @@ def create_global_meta_treeview():
     var_already_spent = StringVar()
     wb = load_workbook("GV compta synthese.xlsx")
     ws = wb["Synthese"]
-    var_budget.set(str(ws.cell(row=1, column=2).value))
-    var_budget_leftover_estimation.set(str(ws.cell(row=2, column=2).value))
-    var_budget_leftover.set(str(ws.cell(row=3, column=2).value))
-    var_will_spend.set(str(ws.cell(row=4, column=2).value))
-    var_already_spent.set(str(ws.cell(row=5, column=2).value))
+    var_budget.set(str(round(ws.cell(row=1, column=2).value, 2)))
+    var_budget_leftover_estimation.set(str(round(ws.cell(row=2, column=2).value, 2)))
+    var_budget_leftover.set(str(round(ws.cell(row=3, column=2).value, 2)))
+    var_will_spend.set(str(round(ws.cell(row=4, column=2).value, 2)))
+    var_already_spent.set(str(round(ws.cell(row=5, column=2).value, 2)))
     wb.close()
     label_budget_intro = Label(frame_global_meta_tree_view, text="Budget total :")
     label_budget_intro.grid(column=0, row=0, sticky="w")
