@@ -21,8 +21,7 @@
   * "Not started" et "Started" : le prix va etre considere comme depense previsionelle
   * "Finished" : le prix va etre considere comme efectif
   * "Canceled" : le prix n'est plus consideré pour les calculs
-* Commentaires :
-#### Champ arbitraire. Juste pour faire la distinction plus facile entre les factures.
+* Commentaires : Champ arbitraire. Juste pour faire la distinction plus facile entre les factures.
 * Button "Confirmer": Sauvgarder les informations dans excel
 * Annuler: Annuler
 
