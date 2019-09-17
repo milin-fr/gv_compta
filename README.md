@@ -1,3 +1,5 @@
+Les parties de l'interface du logiciel sont:
+
 ## "Donnees par type de travaux :"
 * Dans cette liste vont etre affichés les sommes des depenses previsionnels et effectes par type de traveaux.
       
