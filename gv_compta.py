@@ -18,7 +18,7 @@ os.chdir(current_directory)
 LIST_TYPE_OF_WORK = []
 LIST_OF_COMPANIES = []
 LIST_OF_BILLS = []
-LIST_WORK_STATUS = ["Not started", "Started", "Finished", "Canceled"]
+LIST_payment_STATUS = ["Pas payé", "Payé", "Payé", "Annulé"]
 
 class Bill:
     row_placement = ""
@@ -28,7 +28,7 @@ class Bill:
     start_date = ""  #4
     end_date = ""  #5
     price = ""  #6
-    work_status = ""  #7
+    payment_status = ""  #7
     excel_file_name = ""
     def set_excel_name(self):
         self.excel_file_name = "GV compta " + self.work_type + ".xlsx"
@@ -66,7 +66,7 @@ def create_bill_excel_file_if_it_was_not_there(bill_object):
         ws.cell(row=1, column=4, value="start_date")
         ws.cell(row=1, column=5, value="end_date")
         ws.cell(row=1, column=6, value="price")
-        ws.cell(row=1, column=7, value="work_status")
+        ws.cell(row=1, column=7, value="payment_status")
         wb.save(bill_object.excel_file_name)
 
 
@@ -107,9 +107,9 @@ def update_synthese_sheet():
     already_spent = 0
     going_to_spend = 0
     for bill in LIST_OF_BILLS:
-        if bill.work_status == "Finished":
+        if bill.payment_status == "Payé":
             already_spent += float(bill.price)
-        if bill.work_status == "Not started" or bill.work_status == "Started":
+        if bill.payment_status == "Pas payé":
             going_to_spend += float(bill.price)
     wb = load_workbook("GV compta synthese.xlsx")
     ws = wb["Synthese"]
@@ -139,9 +139,9 @@ def update_work_type_sheet():
         going_to_spend = 0
         for bill in LIST_OF_BILLS:
             if bill.work_type == work_type:
-                if bill.work_status == "Finished":
+                if bill.payment_status == "Payé":
                     already_spent += float(bill.price)
-                if bill.work_status == "Not started" or bill.work_status == "Started":
+                if bill.payment_status == "Pas payé":
                     going_to_spend += float(bill.price)
                 ws.cell(row=row_index, column=1, value=bill.work_type)
                 ws.cell(row=row_index, column=2, value=going_to_spend)
@@ -163,9 +163,9 @@ def update_company_sheet():
         going_to_spend = 0
         for bill in LIST_OF_BILLS:
             if bill.company_name == company_name:
-                if bill.work_status == "Finished":
+                if bill.payment_status == "Payé":
                     already_spent += float(bill.price)
-                if bill.work_status == "Not started" or bill.work_status == "Started":
+                if bill.payment_status == "Pas payé":
                     going_to_spend += float(bill.price)
                 ws.cell(row=row_index, column=1, value=bill.company_name)
                 ws.cell(row=row_index, column=2, value=going_to_spend)
@@ -194,7 +194,7 @@ def create_missing_sheet_if_it_was_not_there(bill_object):
         ws.cell(row=1, column=4, value="start_date")
         ws.cell(row=1, column=5, value="end_date")
         ws.cell(row=1, column=6, value="price")
-        ws.cell(row=1, column=7, value="work_status")
+        ws.cell(row=1, column=7, value="payment_status")
         wb.save(bill_object.excel_file_name)
     else:
         wb.close()
@@ -240,18 +240,18 @@ def new_bill():
     entry_end_date = Entry(window_new_bill, width=23)
     entry_end_date.insert(0, today_date_yyyy_mm_dd)
     entry_end_date.grid(column=1, row=4, columnspan=2, pady=5)
-    label_status = Label(window_new_bill, text = "Etat de travaux :", width=15)
+    label_status = Label(window_new_bill, text = "Etat du payment :", width=15)
     label_status.grid(column=0, row=5, pady=5)
-    var_work_status = StringVar()
-    var_work_status.set(LIST_WORK_STATUS[0])
-    dropdown_work_status = OptionMenu(window_new_bill, var_work_status, *LIST_WORK_STATUS)
-    dropdown_work_status.grid(column=1, row=5, columnspan=2, pady=5)
-    dropdown_work_status.config(width=18)
+    var_payment_status = StringVar()
+    var_payment_status.set(LIST_payment_STATUS[0])
+    dropdown_payment_status = OptionMenu(window_new_bill, var_payment_status, *LIST_payment_STATUS)
+    dropdown_payment_status.grid(column=1, row=5, columnspan=2, pady=5)
+    dropdown_payment_status.config(width=18)
     label_comment = Label(window_new_bill, text = "Commentaires :", width=15)
     label_comment.grid(column=0, row=6, columnspan=3, pady=5)
     text_comment = Text(window_new_bill, width=60, height=10)
     text_comment.grid(column=0, row=7, columnspan=3, pady=5)
-    data_entries = [combo_work_selection, combo_company_selection, text_comment, entry_start_date, entry_end_date, entry_price, var_work_status]
+    data_entries = [combo_work_selection, combo_company_selection, text_comment, entry_start_date, entry_end_date, entry_price, var_payment_status]
     button_confirm_new_bill = Button(window_new_bill, text="Confirmer", width=10, height=3, command=lambda: confirm_new_bill(data_entries, window_new_bill))
     button_confirm_new_bill.grid(column=0, row=8, pady=5)
     button_cancel_new_bill = Button(window_new_bill, text="Annuler", width=10, height=3, command=lambda: cancel_current_window(window_new_bill))
@@ -296,20 +296,20 @@ def existing_bill(bill_to_edit):
     entry_end_date = Entry(window_bill_update, width=23)
     entry_end_date.insert(0, bill_to_edit.end_date)
     entry_end_date.grid(column=1, row=4, columnspan=2, pady=5)
-    label_status = Label(window_bill_update, text = "Etat de travaux :", width=15)
+    label_status = Label(window_bill_update, text = "Etat du payment :", width=15)
     label_status.grid(column=0, row=5, pady=5)
-    var_work_status = StringVar()
-    var_work_status.set(bill_to_edit.work_status)
-    dropdown_work_status = OptionMenu(window_bill_update, var_work_status, *LIST_WORK_STATUS)
-    dropdown_work_status.grid(column=1, row=5, columnspan=2, pady=5)
-    dropdown_work_status.config(width=18)
+    var_payment_status = StringVar()
+    var_payment_status.set(bill_to_edit.payment_status)
+    dropdown_payment_status = OptionMenu(window_bill_update, var_payment_status, *LIST_payment_STATUS)
+    dropdown_payment_status.grid(column=1, row=5, columnspan=2, pady=5)
+    dropdown_payment_status.config(width=18)
     label_comment = Label(window_bill_update, text = "Commentaires :", width=15)
     label_comment.grid(column=3, row=0, pady=5)
     text_comment = Text(window_bill_update, width=60, height=10)
     text_comment.grid(column=3, row=1, rowspan=5, pady=5)
     text_comment.insert(END, bill_to_edit.comment)
     row_placement = bill_to_edit.row_placement
-    data_entries = [combo_work_selection, combo_company_selection, text_comment, entry_start_date, entry_end_date, entry_price, var_work_status, row_placement]
+    data_entries = [combo_work_selection, combo_company_selection, text_comment, entry_start_date, entry_end_date, entry_price, var_payment_status, row_placement]
     button_confirm_bill_update = Button(window_bill_update, text="Confirmer", width=10, height=3, command=lambda: confirm_bill_update(data_entries, window_bill_update))
     button_confirm_bill_update.grid(column=0, row=8, pady=5)
     button_cancel_bill_update = Button(window_bill_update, text="Annuler", width=10, height=3, command=lambda: cancel_current_window(window_bill_update))
@@ -329,7 +329,7 @@ def confirm_new_bill(data_entries, window_to_close):
     bill_object.start_date = data_entries[3].get()
     bill_object.end_date = data_entries[4].get()
     bill_object.price = data_entries[5].get().replace(",", ".")
-    bill_object.work_status = data_entries[6].get()
+    bill_object.payment_status = data_entries[6].get()
     bill_object.set_excel_name()
     create_bill_excel_file_if_it_was_not_there(bill_object)
     create_missing_sheet_if_it_was_not_there(bill_object)
@@ -345,7 +345,7 @@ def confirm_bill_update(data_entries, window_to_close):
     bill_object.start_date = data_entries[3].get()
     bill_object.end_date = data_entries[4].get()
     bill_object.price = data_entries[5].get()
-    bill_object.work_status = data_entries[6].get()
+    bill_object.payment_status = data_entries[6].get()
     bill_object.row_placement = data_entries[7]
     bill_object.set_excel_name()
     create_bill_excel_file_if_it_was_not_there(bill_object)
@@ -367,7 +367,7 @@ def save_bill_in_excel(bill_object):
     ws.cell(row=row_of_this_bill, column=4, value=bill_object.start_date)
     ws.cell(row=row_of_this_bill, column=5, value=bill_object.end_date)
     ws.cell(row=row_of_this_bill, column=6, value=bill_object.price)
-    ws.cell(row=row_of_this_bill, column=7, value=bill_object.work_status)
+    ws.cell(row=row_of_this_bill, column=7, value=bill_object.payment_status)
     wb.save(bill_object.excel_file_name)
     update_summary_excel_file()
 
@@ -416,7 +416,7 @@ def doube_click_bill_line(evt, window_to_close):
     bill_to_edit.start_date = clicked_widger.item(row_id, 'values')[3]
     bill_to_edit.end_date = clicked_widger.item(row_id, 'values')[4]
     bill_to_edit.price = clicked_widger.item(row_id, 'values')[5]
-    bill_to_edit.work_status = clicked_widger.item(row_id, 'values')[6]
+    bill_to_edit.payment_status = clicked_widger.item(row_id, 'values')[6]
     bill_to_edit.set_excel_name()
     existing_bill(bill_to_edit)
     cancel_current_window(window_to_close)
@@ -446,7 +446,7 @@ def open_ongoing_view():
     window_ongoing_bill.wm_attributes("-topmost", 1)
     frame_for_the_list = Frame(window_ongoing_bill)
     frame_for_the_list.grid(column=0, row=0)
-    tv_columns = ('work_type', 'company_name', 'comment', "start_date", "end_date", "price", "work_status")
+    tv_columns = ('work_type', 'company_name', 'comment', "start_date", "end_date", "price", "payment_status")
     treeview_details_of_ongoing_bills = Treeview(frame_for_the_list, columns=tv_columns, show='headings')
     for column in tv_columns:
         treeview_details_of_ongoing_bills.heading(column, text=column, command=lambda col=column: treeview_sort_column(treeview_details_of_ongoing_bills, col, False))
@@ -464,7 +464,7 @@ def open_ongoing_view():
                                 bill.start_date,
                                 bill.end_date,
                                 bill.price,
-                                bill.work_status
+                                bill.payment_status
                             ))
     treeview_details_of_ongoing_bills.bind('<Double-1>', lambda event: doube_click_bill_line(event, window_ongoing_bill))
     treeview_details_of_ongoing_bills.configure(yscrollcommand=scrollbar.set)
@@ -488,7 +488,7 @@ def get_details_out_of_excel(excel_file):
             bill.start_date = ws.cell(row=current_row, column=4).value
             bill.end_date = ws.cell(row=current_row, column=5).value
             bill.price = ws.cell(row=current_row, column=6).value
-            bill.work_status = ws.cell(row=current_row, column=7).value
+            bill.payment_status = ws.cell(row=current_row, column=7).value
             bill.set_excel_name()
             LIST_OF_BILLS.append(bill)
     wb.close()
