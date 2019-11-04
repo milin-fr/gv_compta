@@ -18,7 +18,7 @@ os.chdir(current_directory)
 LIST_TYPE_OF_WORK = []
 LIST_OF_COMPANIES = []
 LIST_OF_BILLS = []
-LIST_payment_STATUS = ["Pas payé", "Payé", "Payé", "Annulé"]
+LIST_payment_STATUS = ["Pas payé", "Payé", "Annulé"]
 
 class Bill:
     row_placement = ""
@@ -60,13 +60,13 @@ def create_bill_excel_file_if_it_was_not_there(bill_object):
         wb = Workbook()
         ws = wb.active
         ws.title = bill_object.company_name
-        ws.cell(row=1, column=1, value="work_type")
-        ws.cell(row=1, column=2, value="company_name")
-        ws.cell(row=1, column=3, value="comment")
-        ws.cell(row=1, column=4, value="start_date")
-        ws.cell(row=1, column=5, value="end_date")
-        ws.cell(row=1, column=6, value="price")
-        ws.cell(row=1, column=7, value="payment_status")
+        ws.cell(row=1, column=1, value="Type de traveaux")
+        ws.cell(row=1, column=2, value="Nom de l'entreprise")
+        ws.cell(row=1, column=3, value="Commentaire")
+        ws.cell(row=1, column=4, value="Date de debut des traveaux")
+        ws.cell(row=1, column=5, value="Date de fin des traveaux")
+        ws.cell(row=1, column=6, value="Prix")
+        ws.cell(row=1, column=7, value="Etat du payment")
         wb.save(bill_object.excel_file_name)
 
 
@@ -188,13 +188,13 @@ def create_missing_sheet_if_it_was_not_there(bill_object):
     if bill_object.company_name not in wb.sheetnames:
         wb.create_sheet(bill_object.company_name)
         ws = wb[bill_object.company_name]
-        ws.cell(row=1, column=1, value="work_type")
-        ws.cell(row=1, column=2, value="company_name")
-        ws.cell(row=1, column=3, value="comment")
-        ws.cell(row=1, column=4, value="start_date")
-        ws.cell(row=1, column=5, value="end_date")
-        ws.cell(row=1, column=6, value="price")
-        ws.cell(row=1, column=7, value="payment_status")
+        ws.cell(row=1, column=1, value="Type de traveaux")
+        ws.cell(row=1, column=2, value="Nom de l'entreprise")
+        ws.cell(row=1, column=3, value="Commentaire")
+        ws.cell(row=1, column=4, value="Date de debut des traveaux")
+        ws.cell(row=1, column=5, value="Date de fin des traveaux")
+        ws.cell(row=1, column=6, value="Prix")
+        ws.cell(row=1, column=7, value="Etat du payment")
         wb.save(bill_object.excel_file_name)
     else:
         wb.close()
@@ -519,6 +519,8 @@ def update_meta_data_in_root():
 
 
 def create_global_meta_treeview():
+    for widget in frame_global_meta_tree_view.winfo_children():
+        widget.destroy()
     var_budget = StringVar()
     var_budget_leftover_estimation = StringVar()
     var_budget_leftover = StringVar()
@@ -587,7 +589,7 @@ def update_company_meta_treeview():
 create_summary_excel_file_if_it_was_not_there()
 
 main_window_of_gui = tkinter.Tk()
-main_window_of_gui.title("sandbox")
+main_window_of_gui.title("GV comptabilité V04.11.2019")
 main_window_of_gui.geometry("1000x600")
 main_window_of_gui.resizable(0, 0)
 
