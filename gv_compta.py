@@ -1,3 +1,4 @@
+from BillModel import BillModel
 import tkinter
 from tkinter import Label, Button, Entry, Text, Checkbutton, OptionMenu, Canvas, Frame, Toplevel, Scrollbar, Listbox, Frame
 from tkinter.ttk import Combobox, Treeview
@@ -20,18 +21,7 @@ LIST_OF_COMPANIES = []
 LIST_OF_BILLS = []
 LIST_payment_STATUS = ["Pas payé", "Payé", "Annulé"]
 
-class Bill:
-    row_placement = ""
-    work_type = ""  #1
-    company_name = ""  #2
-    comment = ""  #3
-    start_date = ""  #4
-    end_date = ""  #5
-    price = ""  #6
-    payment_status = ""  #7
-    excel_file_name = ""
-    def set_excel_name(self):
-        self.excel_file_name = "GV compta " + self.work_type + ".xlsx"
+
 
 
 def get_file_names_in_script_directory():
